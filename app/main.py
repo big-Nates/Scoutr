@@ -10,6 +10,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+#testing
 origins = [
     "https://google.com"
 ]
