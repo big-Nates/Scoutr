@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=schemas.MatchGeneralInfo)
-def get_match_general_info(query: schemas.MatchGeneralQuery, db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
+def get_match_general_info(query: schemas.MatchGeneralQuery, current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
     url = f"https://api.ftcscout.org/rest/v1/events/{query.season}/{query.code}/matches"
     response = requests.get(url)
     if response.status_code == 404:

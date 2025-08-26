@@ -11,10 +11,11 @@ router = APIRouter(
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.TeamDisplay)
-def create_team(team_data: schemas.TeamCreate, db: Session = Depends(get_db), user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
-    if user.role != "team_admin":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-                            detail="User does not have the permissions to make a team")
+# user: schemas.UserDisplay = Depends(oauth2.get_current_user)
+def create_team(team_data: schemas.TeamCreate, db: Session = Depends(get_db)):
+    # if user.role != "team_admin":
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+    #                         detail="User does not have the permissions to make a team")
     team_number = team_data.number
     url = f"https://api.ftcscout.org/rest/v1/teams/" + str(team_number)
     response = requests.get(url)
@@ -23,7 +24,7 @@ def create_team(team_data: schemas.TeamCreate, db: Session = Depends(get_db), us
     if response.status_code != 200 or data["name"] != team_data.name:
         raise HTTPException(status_code=response.status_code, detail="Team not found")
 
-    team = models.Team(**user.model_dump())
+    team = models.Team(**team_data.model_dump())
     db.add(team)
     db.commit()
     db.refresh(team)

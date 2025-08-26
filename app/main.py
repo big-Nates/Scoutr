@@ -34,17 +34,6 @@ app.include_router(Match.router)
 
 @app.get("/")
 def root():
-    team_number = 130
-    
-    url = f"https://api.ftcscout.org/rest/v1/teams/130/events/2025"
-    print(url)
-
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        team_data = response.json()
-        print(team_data)
-    else:
-        print(f"Error {response.status_code}: {response.text}")
-
+    return {"message": "Hello",
+            "details": "By me"}
 
