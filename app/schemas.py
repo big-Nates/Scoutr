@@ -31,7 +31,7 @@ class UserCreate(UserBase):
     email: EmailStr
     password: str
 
-class UserDisplay(UserBase):
+class UserDisplay(UserCreate):
     _id: int
     role: str
     team_number: int

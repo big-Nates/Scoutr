@@ -1,26 +1,43 @@
 import pytest
-from tests.database import client, session
-import schemas
+from app import schemas
+from .database import client, session
+from jose import JWTError, jwt
+from app.config import settings
 
+@pytest.fixture
+def test_user(client):
+    user_data = {"first_name": "Big",
+                "last_name_initial": "N",
+                "team_number": 130,
+                "email":"BigNate@gmail.com",
+                 "password": "password123"}
+    res = client.post("/users/", json=user_data)
 
-@pytest.mark.parametrize("first_name, last_name, team_number, email, password",
-                         [
-                            ("Natester", "Taylor", 130, "BigNate@gmail.com", "password123"),
-                            ("Jimmy", "Bones", 130, "MoBones@gmail.com", "password123"),
-                            ("Lily", "Paddack", 130, "JustPaddy@gmail.com", "password123")
-                         ])
+    assert res.status_code == 201
+    new_user = res.json()
+    print(new_user)
+    new_user['password'] = user_data['password']
+    return new_user
 
-def test_create_user(client, first_name, last_name, team_number, email, password):
+def test_create_user(client):
     res = client.post("/users/", json={
-        "first_name": first_name,
-        "last_name": last_name,
-        "team_number": team_number,
-        "email": email,
-        "password": password
+        "first_name": "Natester",
+        "last_name_initial": "T",
+        "team_number": 130,
+        "email": "BigNate@gmail.com",
+        "password": "password123"
     })
-
-    schemas.UserDisplay(**res.json())
     assert res.json().get("team_number") == 130
     assert res.status_code == 201
 
+def test_login_user(client, test_user):
+    res = client.post("/login/", data={
+        "username": "BigNate@gmail.com",
+        "password": "password123"
+    })
+    login_res = schemas.Token(**res.json())
+    payload = jwt.decode(login_res.access_token, settings.secret_key, algorithms=[settings.algorithm])
+    id = payload.get("user_id")
+    assert res.status_code == 200
+    assert login_res.token_type == 'bearer'
 

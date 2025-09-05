@@ -1,5 +1,4 @@
-from jwt import PyJWTError
-import jwt
+from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
 from . import schemas, database, models
 from fastapi import status, Depends, HTTPException
@@ -34,7 +33,7 @@ def verify_access_token(token: str, credentials_exceptions):
             raise credentials_exceptions
         token_data = schemas.TokenData(id=id)
 
-    except PyJWTError:
+    except JWTError:
         raise credentials_exceptions
     
     return token_data
