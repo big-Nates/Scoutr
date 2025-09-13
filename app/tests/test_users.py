@@ -1,7 +1,7 @@
 import pytest
 from app import schemas
 from .database import client, session
-from jose import JWTError, jwt
+from jose import JWTError, jwt # pyright: ignore[reportMissingModuleSource]
 from app.config import settings
 
 @pytest.fixture
@@ -41,3 +41,8 @@ def test_login_user(client, test_user):
     assert res.status_code == 200
     assert login_res.token_type == 'bearer'
 
+# @pytest.mark.parametrize("x, y, expected",[
+#     (1, 4, 5),
+#     (10, -5, 5),
+#     (2, 5, 7)
+# ])

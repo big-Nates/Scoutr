@@ -5,6 +5,8 @@ from app.database import get_db
 from ..oauth2 import get_current_user
 from app import models, schemas, oauth2
 import requests, json
+from requests.auth import HTTPBasicAuth
+from ..config import settings
 
 
 router = APIRouter(
@@ -18,7 +20,7 @@ def create_match_report(season:int, event_code: str, match_report_data: schemas.
 
     #verification of match's existence & the team's participation in the match
     url = f"https://api.ftcscout.org/rest/v1/events/{season}/{event_code}/matches"
-    response = requests.get(url)
+    response = requests.get(url, auth=HTTPBasicAuth(settings.api_username, settings.api_authtoken))
     if response.status_code == 404:
         raise HTTPException(
             status_code=response.status_code,
@@ -54,16 +56,19 @@ def create_match_report(season:int, event_code: str, match_report_data: schemas.
     #Check to see if report was already created
     queried_report = db.query(models.MatchReport).filter(models.MatchReport.user_id == current_user._id, 
                                                          models.MatchReport.team_number == match_report_data.team_number, 
-                                                         models.MatchReport.match_number == match_report_data.match_number).first()
+                                                         models.MatchReport.match_number == match_report_data.match_number,
+                                                         #TODO: Come back to this
+                                                         models.MatchReport.event_code == "event_code" 
+                                                         ).first()
     if queried_report:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Report for team {match_report_data.team_number} was already made by {current_user.first_name} {current_user.last_name_initial}."
         )
     
-    event_id_from_code = db.query(models.Event).filter(models.Event.code == event_code).first()
+    
     print(match_report_data)
-    created_match_report = models.MatchReport(event_id = event_id_from_code._id, creator_id = current_user._id, season = season, **match_report_data.model_dump())
+    created_match_report = models.MatchReport(event_id = -1, creator_id = current_user._id, season = season, **match_report_data.model_dump())
     db.add(created_match_report)
     db.commit()
     db.refresh(created_match_report)

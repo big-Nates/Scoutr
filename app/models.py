@@ -72,7 +72,7 @@ class MatchReport(Base):
     user_id = Column(Integer, ForeignKey("users._id"), nullable=False)
     season = Column(Integer, nullable=False)
     match_number = Column(Integer, nullable=False)
-    event_id = Column(Integer, ForeignKey("events._id"), nullable=False)
+    event_id = Column(String, nullable=False)
     tournament_level = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
 
@@ -93,27 +93,7 @@ class MatchReport(Base):
 
     user = relationship("User", back_populates="match_reports")
     team = relationship("Team", back_populates="match_reports")
-    event = relationship("Event", back_populates="match_reports")
 
-class Event(Base):
-    __tablename__ = "events"
-
-    _id = Column(Integer, primary_key=True)
-
-    name = Column(String, nullable=False)
-    code = Column(String, nullable=False)
-    type = Column(String, nullable = False)
-    season = Column(Integer, nullable=False)
-
-    address = Column(String, nullable=True)
-    liveStreamURL = Column(String, nullable=True)
-
-    start = Column(Date, nullable = False)
-    started = Column(Boolean, nullable = False)
-    ongoing = Column(Boolean, nullable = False)
-    finished = Column(Boolean, nullable = False)
-
-    match_reports = relationship("MatchReport", back_populates="event")
 
     
     
