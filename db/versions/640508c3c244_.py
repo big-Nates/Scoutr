@@ -1,4 +1,4 @@
-"""empty message
+"""Get rid of match_reports foreign key in users table
 
 Revision ID: 640508c3c244
 Revises: ddfe23e0df2e

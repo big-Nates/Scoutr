@@ -76,16 +76,17 @@ class MatchReport(Base):
     tournament_level = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
 
-    auto_scoring_gamepiece_1 = Column(Integer, nullable=False)
-    auto_scoring_gamepiece_2 = Column(Integer, nullable=True)
-    can_auto_park = Column(Boolean, nullable=False)
-    spikemark_bonus = Column(Boolean, nullable=True)
-    bonus_1 = Column(Boolean, nullable=True, server_default="False")
-    bonus_2 = Column(Boolean, nullable=True, server_default="False")
-    bonus_3 = Column(Boolean, nullable=True, server_default="False")
+    classified_amount_auto = Column(Integer, nullable=False)
+    overflow_amount_auto = Column(Integer, nullable=True)
+    can_collect_from_human_player = Column(Boolean, nullable=False)
+    can_deposit_close = Column(Boolean, nullable=False)
+    can_deposit_far = Column(Boolean, nullable=False)
+    can_leave = Column(Boolean, nullable=False)
+    can_motif_in_auto = Column(Boolean, nullable=False)
+    
 
-    teleop_scoring_gamepiece_1 = Column(Integer, nullable=False)
-    teleop_scoring_gamepiece_2 = Column(Integer, nullable=True)
+    classified_amount = Column(Integer, nullable=False)
+    depot_amount = Column(Integer, nullable=False)
     can_endgame_park = Column(Boolean, nullable=False)
     ascent_level = Column(Integer, nullable=False)
 

@@ -72,16 +72,17 @@ class MatchReportBase(ConfigBase):
     match_number: int
     tournament_level: str
 
-    auto_scoring_gamepiece_1: int
-    auto_scoring_gamepiece_2: Optional[int] = 0
-    can_auto_park: bool
-    spikemark_bonus: Optional[bool] = False
-    bonus_1: Optional[bool] = False
-    bonus_2: Optional[bool] = False
-    bonus_3: Optional[bool] = False
 
-    teleop_scoring_gamepiece_1: int
-    teleop_scoring_gamepiece_2: Optional[int] = 0
+    classified_amount_auto: int
+    overflow_amount_auto: Optional[int] = 0
+    can_collect_from_human_player: bool
+    can_deposit_close: bool
+    can_deposit_far: bool
+    can_leave: bool
+    can_motif_in_auto: bool
+
+    classified_amount: int
+    depot_amount: int
     can_endgame_park: bool
     ascent_level: int
 
@@ -91,7 +92,7 @@ class MatchReportBase(ConfigBase):
 class MatchReportCreate(MatchReportBase):
     pass
 
-class MatchReportDisplay(SelfReportDisplay):
+class MatchReportDisplay(MatchReportBase):
     pass
 
 class EventBase(ConfigBase):

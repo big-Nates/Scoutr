@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
  
-@router.post("/{season}/{event_code}")
+@router.post("/{season}/{event_code}", status_code=status.HTTP_201_CREATED)
 def create_match_report(season:int, event_code: str, match_report_data: schemas.MatchReportCreate,db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
 
     #verification of match's existence & the team's participation in the match
@@ -57,8 +57,8 @@ def create_match_report(season:int, event_code: str, match_report_data: schemas.
     queried_report = db.query(models.MatchReport).filter(models.MatchReport.user_id == current_user._id, 
                                                          models.MatchReport.team_number == match_report_data.team_number, 
                                                          models.MatchReport.match_number == match_report_data.match_number,
-                                                         #TODO: Come back to this
-                                                         models.MatchReport.event_code == "event_code" 
+                                                         
+                                                         models.MatchReport.event_id == event_code
                                                          ).first()
     if queried_report:
         raise HTTPException(
@@ -68,7 +68,7 @@ def create_match_report(season:int, event_code: str, match_report_data: schemas.
     
     
     print(match_report_data)
-    created_match_report = models.MatchReport(event_id = -1, creator_id = current_user._id, season = season, **match_report_data.model_dump())
+    created_match_report = models.MatchReport(event_id = event_code, user_id = current_user._id, season = season, **match_report_data.model_dump())
     db.add(created_match_report)
     db.commit()
     db.refresh(created_match_report)
@@ -98,6 +98,25 @@ def get_users_match_reports(user_id: int, db: Session = Depends(get_db), current
             detail=f"User with id {user_id} not found"
         )
     return match_reports
+
+@router.get("/id/{match_report_id}", status_code=status.HTTP_200_OK, response_model=schemas.MatchReportDisplay)
+def get_match_report(match_report_id: int, db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(get_current_user)):
+    user = db.query(models.User).filter(models.User._id == current_user._id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {current_user._id} not found"
+        )
+    if current_user.team_number == db.query(models.User).filter(models.User._id == current_user._id).first().team_number:
+        match_report = db.query(models.MatchReport).filter(models.MatchReport.user_id == current_user._id, models.MatchReport._id == match_report_id).first()
+    else:
+        match_report = db.query(models.MatchReport).filter(models.MatchReport.user_id == current_user._id, models.MatchReport.is_public == True, models.MatchReport._id == match_report_id).first()
+    if not match_report:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {current_user._id} not found"
+        )
+    return match_report
 
 @router.patch("/{match_report_id}", response_model=schemas.MatchReportDisplay)
 def update_match_report(updated_match_report: schemas.MatchReportCreate,match_report_id: int, db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(get_current_user)):
