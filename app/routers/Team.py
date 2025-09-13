@@ -35,6 +35,11 @@ def get_all_teams(db: Session = Depends(get_db)):
     teams = db.query(models.Team).all()
     return teams
 
+@router.get("/{team_number}", status_code=status.HTTP_200_OK, response_model=schemas.TeamDisplay)
+def get_team(team_number: int, db: Session = Depends(get_db)):
+    team = db.query(models.Team).filter(models.Team.number == team_number).first()
+    return team
+
 @router.get("/{team_number}/users", response_model=List[schemas.UserDisplay])
 def get_user(team_number: int, db: Session = Depends(get_db)):
     users = db.query(models.User).filter(models.User.team_number == team_number).all()
