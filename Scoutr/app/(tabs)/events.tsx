@@ -7,9 +7,7 @@ export default function Events() {
     <View
       style={styles.container}
     >
-        <TeamReportIcon>
-
-        </TeamReportIcon>
+        
     </View>
   );
 
