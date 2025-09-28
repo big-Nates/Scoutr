@@ -1,4 +1,4 @@
-from app import schemas
+from backend.app import schemas
 from .database import client, session
 import pytest
 

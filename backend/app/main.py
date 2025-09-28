@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app import models
+from backend import models
 from .database import engine
 from .routers import SelfReport, MatchReport, Match, Team, User, auth
 from .config import settings

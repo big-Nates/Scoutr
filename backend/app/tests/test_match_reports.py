@@ -1,8 +1,8 @@
 import pytest
-from app import schemas
+from backend.app import schemas
 from .database import client, session
 from jose import JWTError, jwt # pyright: ignore[reportMissingModuleSource]
-from app.config import settings
+from backend.app.config import settings
 from ..oauth2 import create_access_token
 from .test_users import test_fixture_create_user
 from .test_teams import test_fixture_create_team
