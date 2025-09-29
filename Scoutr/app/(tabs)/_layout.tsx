@@ -15,6 +15,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: '#FFF9F1',
         },
+         headerShown: false 
         }}>
       <Tabs.Screen 
         name="index" 
@@ -23,6 +24,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
           ),
+
         }}/>
       <Tabs.Screen 
         name="events" 
@@ -31,6 +33,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'medal-outline' : 'medal-outline'} color={color} size={24} />
           ),
+          
         }}/>
       <Tabs.Screen 
         name="create" 
@@ -47,6 +50,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'document' : 'document-outline'} color={color} size={24} />
           ),
+          
         }}/> 
       <Tabs.Screen name="account" 
         options={{ 
