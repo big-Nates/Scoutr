@@ -1,7 +1,10 @@
 import React from "react";
 import { Dimensions, Text, View, StyleSheet, Platform, Pressable} from "react-native";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
+const router = useRouter();
 type Team = {
   number: number;
   name: string;
@@ -19,33 +22,36 @@ const { width, height } = Dimensions.get("screen");
 
 const TeamCard: React.FC<TeamCardProps> = ({ data }) => {
   return (
-    <View style={styles.card}>
-     <View style={styles.cardTopInfo}>
-      <View style={styles.numberTag}>
-        <Text style={styles.numberTagInfo}>
-          #{data.number}
-        </Text>
-      </View>
-      <Pressable>
-        <MaterialIcons style={styles.playStyleImg} name="bookmark" size={30} color="#25292e" />
-      </Pressable>
-     </View>
-     <View style={styles.cardBottomInfo}> 
-      <View style={styles.statusButton}>
+    
+    <View>
+      <Pressable onPress={() =>router.push("/teamProfile")}  style={styles.card}>
+        <View style={styles.cardTopInfo}>
+          <View style={styles.numberTag}>
+            <Text style={styles.numberTagInfo}>
+              #{data.number}
+            </Text>
+          </View>
+          <Pressable>
+            <MaterialCommunityIcons style={styles.playStyleImg} name="robot" size={30} color="#25292e" />
+          </Pressable>
+        </View>
+        <View style={styles.cardBottomInfo}> 
+          <View style={styles.statusButton}>
 
-      </View>
-      <View style={styles.stats}>
-        <Text>
-          Play-Style
-        </Text>
-        <Text>
-          Auto Scoring
-        </Text>
-        <Text>
-          Tele-Op Scoring
-        </Text>
-      </View>
-     </View>
+          </View>
+          <View style={styles.stats}>
+            <Text>
+              Play-Style
+            </Text>
+            <Text>
+              Auto Scoring
+            </Text>
+            <Text>
+              Tele-Op Scoring
+            </Text>
+          </View>
+        </View>
+      </Pressable>
     </View>
   );
 };
@@ -56,11 +62,11 @@ const styles = StyleSheet.create({
     height: height * 0.3,
     borderRadius: 15,
     marginTop: height * .025,
-    marginLeft: width * .05,
+    marginLeft: width * .066,
     flexDirection: "column",
     justifyContent: "space-between",
     backgroundColor: "#D9D9D9",
-    borderWidth: 1,
+    borderWidth: 0,
   },
   cardTopInfo:{
     width: "100%",
@@ -74,12 +80,15 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   numberTag:{
-    height:"75%",
+    height:"auto",
     borderRadius: 25,
     backgroundColor: "#ffc8aeff",
+    alignItems:"center",
+    justifyContent:"center",
     paddingLeft: 10,
     paddingRight: 10,
     paddingTop:5,
+    paddingBottom:2.5,
   },
   playStyleImg:{
     

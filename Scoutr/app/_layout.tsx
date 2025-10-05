@@ -1,10 +1,19 @@
-import { Stack } from "expo-router";
-
+import { Stack } from 'expo-router';
 
 export default function RootLayout() {
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      {/* Tabs navigator */}
+      <Stack.Screen
+        name="(tabs)"
+        options={{ headerShown: false }}
+      />
+
+      {/* Hidden screens */}
+      <Stack.Screen
+        name="teamProfile"
+        options={{ headerShown: false }} // optional, hide header
+      />
     </Stack>
   );
 }
