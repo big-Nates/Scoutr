@@ -17,3 +17,6 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
     
     access_token = oauth2.create_access_token(data = {"user_id": user._id, "user_email": user.email})
     return {"access_token":  access_token, "token_type": "bearer"}
+@router.get("/verify")
+def verify_token(current_user: schemas.UserBase = Depends(oauth2.get_current_user)):
+    return {"user_id": current_user._id, "email": current_user.email}

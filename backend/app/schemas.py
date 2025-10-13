@@ -36,6 +36,11 @@ class UserDisplay(UserCreate):
     role: str
     team_number: int
 
+class UserSafeDiplay(UserBase):
+    _id: int
+    role: str
+    team_number: int
+
 class SelfReportBase(ConfigBase):
     is_public: bool
     profile_img_url: Optional[str] = None

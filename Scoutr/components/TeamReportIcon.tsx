@@ -24,7 +24,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ data }) => {
   return (
     
     <View>
-      <Pressable onPress={() =>router.push("/teamProfile")}  style={styles.card}>
+      <Pressable onPress={() =>router.navigate(`/(tabs)/reports/teamProfile?number=${data.number}&name=${data.name}`)}  style={styles.card}>
         <View style={styles.cardTopInfo}>
           <View style={styles.numberTag}>
             <Text style={styles.numberTagInfo}>

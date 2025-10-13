@@ -14,7 +14,8 @@ app = FastAPI()
 
 
 origins = [
-    "https://google.com"
+    "http://localhost",
+    "http://localhost:8081"
 ]
 
 app.add_middleware(
@@ -35,7 +36,7 @@ app.include_router(Match.router)
 
 @app.get("/")
 def root():
-    url = f"http://ftc-api.firstinspires.org/v2.0/2024/teams?state=Ontario"
+    url = f"http://ftc-api.firstinspires.org/v2.0/2024/events?eventCode=USCTCMP"
     response = requests.get(url, auth=HTTPBasicAuth(settings.api_username, settings.api_authtoken))
     return {"message": "Response",
             "details": response.json()}
