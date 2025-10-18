@@ -54,7 +54,6 @@ def get_current_user_profile(current_user: models.User = Depends(get_current_use
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated"
         )
-    # Optionally refresh from DB if you want the latest info
     user = db.query(models.User).filter(models.User._id == current_user._id).first()
     return user
 
