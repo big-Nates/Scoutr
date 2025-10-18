@@ -11,20 +11,23 @@ router = APIRouter(
 )
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.TeamDisplay)
-# user: schemas.UserDisplay = Depends(oauth2.get_current_user)
-def create_team(team_data: schemas.TeamCreate, db: Session = Depends(get_db)):
-    # if user.role != "team_admin":
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
-    #                         detail="User does not have the permissions to make a team")
-    team_number = team_data.number
-    url = f"https://api.ftcscout.org/rest/v1/teams/" + str(team_number)
+def create_team(team_data: schemas.TeamCreate, db: Session = Depends(get_db), user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
+    if user.team_number != team_data.number:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="User does not have the permissions to make a team")
+    url = f"https://api.ftcscout.org/rest/v1/teams/" + str(team_data.number)
     response = requests.get(url)
     data = response.json()
 
     if response.status_code != 200 or data["name"] != team_data.name:
-        raise HTTPException(status_code=response.status_code, detail="Team not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
+    
+    if db.query(models.Team).filter(models.Team.number == team_data.number).first():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Duplicate teams are forbidden")
 
-    team = models.Team(**team_data.model_dump())
+    team = models.Team(rookie_year = data["rookieYear"],
+                       organization = data["schoolName"], 
+                       **team_data.model_dump())
     db.add(team)
     db.commit()
     db.refresh(team)

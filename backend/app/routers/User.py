@@ -12,16 +12,13 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserDisplay)
 def create_user(new_user: schemas.UserCreate, db: Session = Depends(get_db)):
-
-    # hash the password
     hashed_password = utils.hash(new_user.password)
     new_user.password = hashed_password
 
     team_number = new_user.team_number
     url = "https://api.ftcscout.org/rest/v1/teams/"+str(team_number)
-
-    queried_user = db.query(models.User).filter(new_user.email == models.User.email).first()
     response = requests.get(url)
+    queried_user = db.query(models.User).filter(new_user.email == models.User.email).first()
     queried_user2 = db.query(models.User).filter(models.User.team_number == new_user.team_number).all()
 
     if queried_user:

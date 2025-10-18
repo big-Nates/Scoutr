@@ -21,6 +21,8 @@ class TeamCreate(TeamBase):
 
 class TeamDisplay(TeamBase):
     _id: int
+    organization: str
+    rookie_year: int
 
 class UserBase(ConfigBase):
     first_name: str
@@ -43,31 +45,40 @@ class UserSafeDiplay(UserBase):
 
 class SelfReportBase(ConfigBase):
     is_public: bool
-    profile_img_url: Optional[str] = None
 
-    auto_scoring_gamepiece_1: int
-    auto_scoring_gamepiece_2: Optional[int] = 0
-    can_auto_park: bool
-    spikemark_bonus: Optional[bool] = None
-    bonus_1: bool = False
-    bonus_2: bool = False
-    bonus_3: bool = False
+    team_number: int
 
-    teleop_scoring_gamepiece_1: int
-    teleop_scoring_gamepiece_2: Optional[int] = 0
+    classified_amount_auto: int
+    overflow_amount_auto: Optional[int] = 0
+    can_collect_from_human_player: bool
+    can_deposit_close: bool
+    can_deposit_far: bool
+    can_leave: bool
+    can_motif_in_auto: bool
+
+    classified_amount: int
+    depot_amount: int
     can_endgame_park: bool
     ascent_level: int
 
-    additional_info: str
+    additional_info: Optional[str] = "No additional info about the team"
 
 class SelfReportCreate(SelfReportBase):
-    pass
+    team_number: int
 
-class SelfReportDisplay(SelfReportBase):
+class SelfReportFullDisplay(SelfReportBase):
     _id: int
     team: Optional[TeamDisplay] = None
     team_id: int
+
+class SelfReportIconDisplay(ConfigBase):
+    _id: int
     team_number: int
+    profile_img_url: Optional[str] = None
+    classified_amount_auto: int
+    can_collect_from_human_player: bool
+    can_deposit_close: bool
+    can_deposit_far: bool
 
 
 class MatchReportBase(ConfigBase):
@@ -160,7 +171,7 @@ class MatchScoreInfo(ConfigBase):
 
 
 TeamDisplay.model_rebuild()
-SelfReportDisplay.model_rebuild()
+SelfReportFullDisplay.model_rebuild()
 MatchReportDisplay.model_rebuild()
 
 
