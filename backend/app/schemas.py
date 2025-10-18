@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import TIMESTAMP
 from typing import Literal, Optional, List
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 
@@ -20,7 +20,7 @@ class TeamCreate(TeamBase):
     pass
 
 class TeamDisplay(TeamBase):
-    _id: int
+    id: int = Field(alias="_id")
     organization: str
     rookie_year: int
 
@@ -34,12 +34,12 @@ class UserCreate(UserBase):
     password: str
 
 class UserDisplay(UserCreate):
-    _id: int
+    id: int = Field(alias="_id")
     role: str
     team_number: int
 
 class UserSafeDiplay(UserBase):
-    _id: int
+    id: int = Field(alias="_id")
     role: str
     team_number: int
 
@@ -47,6 +47,7 @@ class SelfReportBase(ConfigBase):
     is_public: bool
 
     team_number: int
+    season: int
 
     classified_amount_auto: int
     overflow_amount_auto: Optional[int] = 0
@@ -67,18 +68,20 @@ class SelfReportCreate(SelfReportBase):
     team_number: int
 
 class SelfReportFullDisplay(SelfReportBase):
-    _id: int
+    id: int = Field(alias="_id")
     team: Optional[TeamDisplay] = None
     team_id: int
 
-class SelfReportIconDisplay(ConfigBase):
-    _id: int
+class SelfReportIconDisplay(BaseModel):
+    id: int = Field(alias="_id")
     team_number: int
     profile_img_url: Optional[str] = None
     classified_amount_auto: int
     can_collect_from_human_player: bool
     can_deposit_close: bool
     can_deposit_far: bool
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MatchReportBase(ConfigBase):
@@ -109,7 +112,8 @@ class MatchReportCreate(MatchReportBase):
     pass
 
 class MatchReportDisplay(MatchReportBase):
-    pass
+    user: UserSafeDiplay
+    model_config = ConfigDict(from_attributes=True)
 
 class EventBase(ConfigBase):
     code: str
@@ -129,7 +133,7 @@ class EventCreate(EventBase):
     finished: bool
 
 class EventDisplay(EventBase):
-    _id: int
+    id: int = Field(alias="_id")
     name:str
     type: str
     address: str

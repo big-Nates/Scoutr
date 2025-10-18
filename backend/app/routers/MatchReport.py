@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, status, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, contains_eager
 from backend.app.database import get_db
 from ..oauth2 import get_current_user
 from backend.app import models, schemas, oauth2
@@ -74,8 +74,14 @@ def create_match_report(season:int, event_code: str, match_report_data: schemas.
     return created_match_report
 
 @router.get("/", status_code=status.HTTP_200_OK, response_model=List[schemas.MatchReportDisplay])
-def get_all_teams_match_reports(db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(get_current_user)):
-    match_reports = db.query(models.MatchReport).filter(models.MatchReport.team_number == current_user.team_number).all()
+def get_all_match_reports(db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(get_current_user)):
+    match_reports = db.query(models.MatchReport).filter(models.MatchReport.is_public == True).all()
+    return match_reports
+
+@router.get("/{team_number}", status_code=status.HTTP_200_OK, response_model=List[schemas.MatchReportDisplay])
+def get_all_teams_match_reports(team_number: int, db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(get_current_user)):
+    match_reports = db.query(models.MatchReport).join(models.MatchReport.user).options(contains_eager(models.MatchReport.user)) .filter(models.MatchReport.team_number == team_number,
+                                                                                                                                        models.User.team_number == current_user.team_number).all()
     return match_reports
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK, response_model=List[schemas.MatchReportDisplay])
@@ -98,7 +104,7 @@ def get_users_match_reports(user_id: int, db: Session = Depends(get_db), current
     return match_reports
 
 @router.get("/id/{match_report_id}", status_code=status.HTTP_200_OK, response_model=schemas.MatchReportDisplay)
-def get_match_report(match_report_id: int, db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(get_current_user)):
+def get_match_report_by_id(match_report_id: int, db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(get_current_user)):
     
     if current_user.team_number == db.query(models.User).filter(models.User._id == current_user._id).first().team_number:
         match_report = db.query(models.MatchReport).filter(models.MatchReport.user_id == current_user._id, models.MatchReport._id == match_report_id).first()

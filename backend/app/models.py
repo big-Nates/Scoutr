@@ -9,7 +9,7 @@ Base = declarative_base()
 class Team(Base):
     __tablename__ = "teams"
 
-    _id = Column(Integer, primary_key=True)
+    _id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, unique=True, nullable=False)
     number = Column(Integer, unique=True, nullable=False)
     organization = Column(String, nullable=False, server_default=text("None"))
@@ -22,7 +22,7 @@ class Team(Base):
 class User(Base):
     __tablename__ = "users"
 
-    _id = Column(Integer, primary_key=True)
+    _id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
     first_name = Column(String, nullable=False)
@@ -37,7 +37,7 @@ class User(Base):
 class SelfReport(Base):
     __tablename__ = "self_reports"
 
-    _id = Column(Integer, primary_key=True)
+    _id = Column(Integer, primary_key=True, autoincrement=True)
     is_public = Column(Boolean, nullable=False)
 
     team_number = Column(Integer, ForeignKey("teams.number"), nullable=False)

@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=schemas.SelfReportBase, status_code=status.HTTP_200_OK)
-def createSelfReport(self_report_data: schemas.SelfReportCreate,db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
+def create_Self_Report(self_report_data: schemas.SelfReportCreate,db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
     if current_user.role != "team_admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -21,20 +21,20 @@ def createSelfReport(self_report_data: schemas.SelfReportCreate,db:Session = Dep
         )
     db.query(models.SelfReport).filter(models.SelfReport.team_number == current_user.team_number, 
                                        models.SelfReport.user_id == current_user._id).update({models.SelfReport.is_newest: True})
-    newest_self_report = models.MatchReport(team_number = current_user.team_number, 
-                                           user_id = current_user._id,  
+    newest_self_report = models.SelfReport(user_id = current_user._id,  
                                            **self_report_data.model_dump())
     db.add(newest_self_report)
     db.commit()
     db.refresh(newest_self_report)
+    return newest_self_report
 
 @router.get("/", response_model=List[schemas.SelfReportIconDisplay], status_code=status.HTTP_200_OK)
-def getAllSelfReports(db:Session = Depends(get_db)):
+def get_All_Self_Reports(db:Session = Depends(get_db)):
     queried_reports = db.query(models.SelfReport).filter(models.SelfReport.is_public == True).all()
     return queried_reports
     
 @router.get("/teams/{team_number}", response_model=List[schemas.SelfReportFullDisplay], status_code=status.HTTP_200_OK)
-def getSelfReportsbyTeam(team_number: int, db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
+def get_Self_Reports_by_Team(team_number: int, db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
     if(team_number == current_user.team_number):
         queried_reports = db.query(models.SelfReport).filter(models.SelfReport.team_number == team_number).all()
     else:
@@ -42,7 +42,7 @@ def getSelfReportsbyTeam(team_number: int, db:Session = Depends(get_db), current
     return queried_reports
 
 @router.get("/{_id}", response_model=List[schemas.SelfReportFullDisplay], status_code=status.HTTP_200_OK)
-def getSelfReportbyId(_id: int, db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
+def get_Self_Report_by_Id(_id: int, db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
     queried_report_on_team = db.query(models.SelfReport).filter(models.SelfReport._id == _id, models.SelfReport.team_number == current_user.team_number).first()
     if queried_report_on_team is None:
         queried_report = db.query(models.SelfReport).filter(models.SelfReport._id == _id, models.SelfReport.is_public == True).first()
@@ -57,7 +57,7 @@ def getSelfReportbyId(_id: int, db:Session = Depends(get_db), current_user: sche
         return queried_report_on_team
     
 @router.delete("/{id}", response_model=List[schemas.SelfReportFullDisplay], status_code=status.HTTP_200_OK)
-def deleteSelfReport(_id: int, db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
+def delete_Self_Report(_id: int, db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
     queried_report = db.query(models.SelfReport).filter(models.SelfReport._id == id, models.SelfReport.team_number == current_user.team_number).first()
     if queried_report is None:
         raise HTTPException(
