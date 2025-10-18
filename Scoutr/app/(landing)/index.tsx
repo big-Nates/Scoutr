@@ -27,7 +27,7 @@ export default function LandingPage() {
         </Text>
         <TouchableOpacity
           style={styles.ctaButton}
-          onPress={() => router.push('/reports')}
+          onPress={() => router.push('/(auth)/login')}
         >
           <Text style={styles.ctaText}>Get Started</Text>
         </TouchableOpacity>

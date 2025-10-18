@@ -4,11 +4,11 @@ export default function ReportsLayout() {
   return (
     <Stack>
       <Stack.Screen
-        name="index"
+        name="login"
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="reports"
+        name="register"
         options={{ headerShown: false }}
       />
       <Stack.Screen

@@ -1,27 +1,56 @@
-import { View, Text, Button, StyleSheet, ScrollView, Dimensions, Alert, TouchableOpacity, FlatList } from 'react-native';
+import React, {useState, useEffect} from "react";
+import { View, Text, Button, StyleSheet, ScrollView, Dimensions, Alert, TouchableOpacity, FlatList, ActivityIndicator, } from 'react-native';
 import { useRouter, useGlobalSearchParams } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import ProtectedRoute from "@/components/ProtectedRoute";
+import api from "@/app/api/client";
 
 
 const { width, height } = Dimensions.get("screen");
 export default function TeamProfile() {
   const params = useGlobalSearchParams();
   const router = useRouter();
-  const { number, name, } = params;
+  const { team_number, team_name, } = params;
   // Sample team data
-  const teams = [
-    { number: 130, status: "Maintenance", name: "Blazing Spirits" },
-    { number: 16008, status: "Major Error", name: "Armored Artimesis" },
-    { number: 13000, status: "Major Error", name: "Data Wolves" },
-    { number: 1, status: "Major Error", name: "Team Unlimited" },
-    { number: 40, status: "Major Error", name: "HAX robotics" },
-    { number: 11260, status: "Major Error", name: "Up-A-Creek Robotics" },
-    { number: 11260, status: "Major Error", name: "Up-A-Creek Robotics" },
-  ];
+  
 
+  const [reports, setReports] = useState<{
+      _id: number;
+      team_number: number;
+      team_name: string;
+      profile_img_url: string;
+      classified_amount_auto: number;
+      can_collect_from_human_player: boolean;
+      can_deposit_close: boolean;
+      can_deposit_far: boolean;
+    }[]>([]);
+  
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+      // Define an async function *inside* useEffect
+      const fetchData = async () => {
+        try {
+          const json = await api.get('match_reports/'+team_number);
+          setReports(json.data);
+          console.log(json);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      // Call the async function
+      fetchData();
+    }, []); // Empty dependency array = run once
+
+    if (loading) {
+        return <ActivityIndicator size="large" style={{ flex: 1 }} />;
+      }
   return (
-    <View style={styles.main}>
+    <ProtectedRoute>
+      <View style={styles.main}>
       <View style={styles.navBar}>
         <MaterialCommunityIcons name="chevron-left" size={40} color="#000000ff" onPress={() => router.navigate("/(tabs)/reports")} />
       </View>
@@ -43,10 +72,10 @@ export default function TeamProfile() {
               </View>
               <View style={{justifyContent:"space-around", alignItems:"center",}}>
                 <Text style={{}}>
-                  Team #{number} {name}
+                  Team #{team_number} {team_name}
                 </Text>
                 <TouchableOpacity style={styles.button} onPress={() => alert('Pressed!')}>
-                  <Text>Tap Me</Text>
+                  <Text>Team Report</Text>
                   <MaterialCommunityIcons style={{padding:0, justifyContent: "center", alignItems:"center"}} name="information" size={20} color="#000000ff" onPress={() => router.back()} />
                 </TouchableOpacity>
               </View>
@@ -64,7 +93,7 @@ export default function TeamProfile() {
           
         </View>
 
-        <View style={styles.statsInfo}>
+        {/* <View style={styles.statsInfo}>
           <Text style={styles.title}>
             Team Statistics
           </Text>
@@ -82,7 +111,7 @@ export default function TeamProfile() {
           <ScrollView style={styles.statsTable}>
             <View>
               <FlatList
-                data={teams}
+                data={reports}
                 renderItem={({ item }) => (
                   <View style={styles.row}>
                     <View style={styles.headerText}>
@@ -96,14 +125,14 @@ export default function TeamProfile() {
                     </View>
                   </View>
                 )}
-                keyExtractor={(item) => item.number.toString()}
+                keyExtractor={(item) => item.team_number.toString()}
                 numColumns={1}
               />
               
               
             </View>
           </ScrollView>
-        </View>
+        </View> */}
 
         <View style={styles.reportsInfo}>
           <Text style={styles.title}>
@@ -112,12 +141,12 @@ export default function TeamProfile() {
           <View>
             <ScrollView style={styles.statsTable}>
               <FlatList
-              data={teams}
+              data={reports}
               renderItem={({ item }) => (
                 
                 <View style={styles.statBox}></View>
               )}
-              keyExtractor={(item) => item.number.toString()}
+              keyExtractor={(item) => item.team_number.toString()}
               numColumns={1}
               />
             </ScrollView>
@@ -125,9 +154,9 @@ export default function TeamProfile() {
         </View>
       </ScrollView>
     </View>
+    </ProtectedRoute>
+    
   );
-
-  
 }
 const styles = StyleSheet.create({
     main:{
@@ -170,8 +199,8 @@ const styles = StyleSheet.create({
       height:height * 0.45,
     },
     button:{
-      height: height * 0.035,
-      width: width * 0.15,
+      height: height * 0.055,
+      width: width * 0.095,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",

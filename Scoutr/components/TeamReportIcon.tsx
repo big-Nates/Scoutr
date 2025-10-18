@@ -1,34 +1,50 @@
-import React from "react";
-import { Dimensions, Text, View, StyleSheet, Platform, Pressable} from "react-native";
+import React, {useEffect, useState} from "react";
+import { Dimensions, Text, View, StyleSheet, Platform, Pressable, } from "react-native";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 const router = useRouter();
 type Team = {
-  number: number;
-  name: string;
-  status: string;
-
+  _id: number;
+  team_number: number;
+  team_name: string;
+  profile_img_url: string;
+  classified_amount_auto: number;
+  can_collect_from_human_player: Boolean;
+  can_deposit_close: Boolean;
+  can_deposit_far: Boolean;
 };
 
 type TeamCardProps = {
   data: Team;
 };
 
+
 const { width, height } = Dimensions.get("screen");
 
 
 
 const TeamCard: React.FC<TeamCardProps> = ({ data }) => {
-  return (
+  const collectionStyle = data.can_collect_from_human_player
+  ? "Load & Go"
+  : "Scavenger";
+
+  const scoringStyle = data.can_deposit_close
+  ? data.can_deposit_far
+    ? "The Complete Package"
+    : "Post Master"
+  : data.can_deposit_far
+    ? "Sharp Shooter"
+    : "Depot Demon";
+    return(
     
     <View>
-      <Pressable onPress={() =>router.navigate(`/(tabs)/reports/teamProfile?number=${data.number}&name=${data.name}`)}  style={styles.card}>
+      <Pressable onPress={() =>router.navigate(`/(tabs)/reports/teamProfile?team_number=${data.team_number}`)}  style={styles.card}>
         <View style={styles.cardTopInfo}>
           <View style={styles.numberTag}>
             <Text style={styles.numberTagInfo}>
-              #{data.number}
+              #{data.team_number}
             </Text>
           </View>
           <Pressable>
@@ -41,13 +57,13 @@ const TeamCard: React.FC<TeamCardProps> = ({ data }) => {
           </View>
           <View style={styles.stats}>
             <Text>
-              Play-Style
+              {data.classified_amount_auto} artifacts in auto
             </Text>
             <Text>
-              Auto Scoring
+              {collectionStyle} Scorer
             </Text>
             <Text>
-              Tele-Op Scoring
+              {scoringStyle}
             </Text>
           </View>
         </View>
