@@ -3,6 +3,7 @@ from backend.app import models, schemas, utils
 from fastapi import Depends, FastAPI, HTTPException, status, Response, APIRouter
 from sqlalchemy.orm import Session
 from ..database import engine,get_db
+from ..oauth2 import get_current_user
 import requests
 
 router = APIRouter(
@@ -45,6 +46,20 @@ def create_user(new_user: schemas.UserCreate, db: Session = Depends(get_db)):
 def get_all_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
+
+@router.get("/me", response_model=schemas.UserDisplay)
+def get_current_user_profile(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    Returns the currently logged-in user's profile.
+    """
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+    # Optionally refresh from DB if you want the latest info
+    user = db.query(models.User).filter(models.User._id == current_user._id).first()
+    return user
 
 @router.get("/{user_id}", response_model=schemas.UserDisplay)
 def get_user(user_id: int, db: Session = Depends(get_db)):
