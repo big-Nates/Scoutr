@@ -2,7 +2,7 @@ import axios from "axios";
 import { getToken } from "./auth";
 
 const api = axios.create({
-  baseURL: "http://192.168.68.52:8000", // your FastAPI base URL
+  baseURL: "http://127.0.0.1:8000/", // your FastAPI base URL
 });
 
 // Automatically attach JWT token to every request
