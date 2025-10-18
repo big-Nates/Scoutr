@@ -19,8 +19,7 @@ def create_Self_Report(self_report_data: schemas.SelfReportCreate,db:Session = D
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"User with id {current_user._id} cannot create Self Reports"
         )
-    db.query(models.SelfReport).filter(models.SelfReport.team_number == current_user.team_number, 
-                                       models.SelfReport.user_id == current_user._id).update({models.SelfReport.is_newest: True})
+    db.query(models.SelfReport).filter(models.SelfReport.team_number == current_user.team_number).update({models.SelfReport.is_newest: False})
     newest_self_report = models.SelfReport(user_id = current_user._id,  
                                            **self_report_data.model_dump())
     db.add(newest_self_report)
@@ -30,7 +29,7 @@ def create_Self_Report(self_report_data: schemas.SelfReportCreate,db:Session = D
 
 @router.get("/", response_model=List[schemas.SelfReportIconDisplay], status_code=status.HTTP_200_OK)
 def get_All_Self_Reports(db:Session = Depends(get_db)):
-    queried_reports = db.query(models.SelfReport).filter(models.SelfReport.is_public == True).all()
+    queried_reports = db.query(models.SelfReport).filter(models.SelfReport.is_public == True, models.SelfReport.is_newest == True,).all()
     return queried_reports
     
 @router.get("/teams/{team_number}", response_model=List[schemas.SelfReportFullDisplay], status_code=status.HTTP_200_OK)
