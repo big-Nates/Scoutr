@@ -49,9 +49,6 @@ def get_all_users(db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=schemas.UserDisplay)
 def get_current_user_profile(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """
-    Returns the currently logged-in user's profile.
-    """
     if not current_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
