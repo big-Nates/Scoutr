@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, TIMESTAMP, text, ForeignKey, Date
+from sqlalchemy import Boolean, Column, Integer, Numeric, String, TIMESTAMP, text, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import declarative_base
 
@@ -45,22 +45,23 @@ class SelfReport(Base):
     season = Column(Integer, nullable=False, server_default=text("2025"))
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
 
-    classified_amount_auto = Column(Integer, nullable=False)
-    overflow_amount_auto = Column(Integer, nullable=True, server_default=text("0"))
-    can_collect_from_human_player = Column(Boolean, nullable=False)
-    can_deposit_close = Column(Boolean, nullable=False)
-    can_deposit_far = Column(Boolean, nullable=False)
-    can_leave = Column(Boolean, nullable=False)
-    can_motif_in_auto = Column(Boolean, nullable=False)
+    classified_amount_auto = Column(Integer, nullable=False, server_default=text("0"))
+    overflow_amount_auto = Column(Integer, nullable=False, server_default=text("0"))
+    motif_amount_auto = Column(Integer, nullable=False, server_default=text("0"))
     
+    classified_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
+    depot_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
+    overflow_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
 
-    classified_amount = Column(Integer, nullable=False)
-    depot_amount = Column(Integer, nullable=False)
-    can_endgame_park = Column(Boolean, nullable=False)
-    ascent_level = Column(Integer, nullable=False)
+    average_collection_time = Column(Numeric(4,2), nullable = True, server_default=text("0"))
+    time_to_shoot = Column(Numeric(4,2), nullable = True, server_default=text("0"))
+    time_to_park = Column(Numeric(4,2), nullable = True, server_default=text("0"))
+    can_deposit_close = Column(Boolean, nullable=False, server_default=text("FALSE"))
+    can_deposit_far = Column(Boolean, nullable=False, server_default=text("FALSE"))
+    can_park_two_robots = Column(Boolean, nullable=False, server_default=text("FALSE"))
 
     additional_info = Column(String, nullable=True)
-    is_newest = Column(Boolean, nullable=False, default=True)
+    is_newest = Column(Boolean, nullable=False, server_default=text("TRUE"))
 
     user = relationship("User", back_populates="self_reports")
     team = relationship("Team", back_populates="self_reports")
