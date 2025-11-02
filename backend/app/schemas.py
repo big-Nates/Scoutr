@@ -45,24 +45,25 @@ class UserSafeDiplay(UserBase):
 
 class SelfReportBase(ConfigBase):
     is_public: bool
-
-    team_number: int
     season: int
 
     classified_amount_auto: int
-    overflow_amount_auto: Optional[int] = 0
-    can_collect_from_human_player: bool
+    overflow_amount_auto: int
+    motif_amount_auto: int
+
+    classified_amount_teleop: int
+    depot_amount_teleop: int
+    overflow_amount_teleop: int
+
+    average_collection_time: Optional[float] = None
+    time_to_shoot: Optional[float] = None
+    time_to_park: Optional[float] = None
+
     can_deposit_close: bool
     can_deposit_far: bool
-    can_leave: bool
-    can_motif_in_auto: bool
+    can_park_two_robots: bool
 
-    classified_amount: int
-    depot_amount: int
-    can_endgame_park: bool
-    ascent_level: int
-
-    additional_info: Optional[str] = "No additional info about the team"
+    additional_info: Optional[str] = None
 
 class SelfReportCreate(SelfReportBase):
     team_number: int
