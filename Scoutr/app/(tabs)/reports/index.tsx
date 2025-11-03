@@ -7,6 +7,7 @@ import {
   Dimensions,
   TextInput,
   ActivityIndicator,
+  Pressable,
   Platform,
 } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -33,10 +34,7 @@ export default function Reports() {
   const [reports, setReports] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-
-  // Fetch reports once on mount
-  useEffect(() => {
-    const fetchReports = async () => {
+  const fetchReports = async () => {
       try {
         const data = await api.get("self_reports/");
         setReports(data.data);
@@ -46,6 +44,10 @@ export default function Reports() {
         setLoading(false);
       }
     };
+
+  // Fetch reports once on mount
+  useEffect(() => {
+    
     fetchReports();
   }, []);
 
@@ -83,6 +85,12 @@ export default function Reports() {
               <MaterialIcons name="menu" size={30} color="#25292e" />
               <MaterialIcons name="arrow-drop-down" size={30} color="#25292e" />
             </View>
+            <Pressable
+              onPress={fetchReports}
+              style={{}}
+            >
+              <MaterialIcons name="refresh" size={30} color="#25292e" />
+            </Pressable>
             <View style={styles.searchBox}>
               <TextInput
                 placeholder="Search Team Name"
@@ -129,7 +137,7 @@ const styles = StyleSheet.create({
   filterBarRight: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: width * 0.3,
+    width: width * 0.35,
     alignItems: "center",
   },
   filterBarLeft: {
