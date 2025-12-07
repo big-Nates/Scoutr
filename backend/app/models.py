@@ -50,7 +50,7 @@ class SelfReport(Base):
     motif_amount_auto = Column(Integer, nullable=False, server_default=text("0"))
     
     classified_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
-    depot_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
+    motif_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
     overflow_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
 
     average_collection_time = Column(Numeric(4,2), nullable = True, server_default=text("0"))
@@ -75,7 +75,7 @@ class MatchReport(Base):
     team_number = Column(Integer, nullable=False)
     creator_team_number = Column(Integer, ForeignKey("teams.number"), nullable=False)
     user_id = Column(Integer, ForeignKey("users._id"), nullable=False)
-    season = Column(Integer, nullable=False, server_default=text("2025"))
+    season = Column(Integer, nullable=False, server_default=text("2024"))
     match_number = Column(Integer, nullable=False)
     event_id = Column(String, nullable=False)
     tournament_level = Column(String, nullable=False)
@@ -86,17 +86,15 @@ class MatchReport(Base):
     motif_amount_auto = Column(Integer, nullable=False, server_default=text("0"))
     
     classified_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
-    depot_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
+    motif_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
     overflow_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
 
+    shots_made_auto = Column(Integer, nullable=False, server_default=text("0"))
+    shots_attempted_auto = Column(Integer, nullable=False, server_default=text("0"))
     shots_made_teleop = Column(Integer, nullable=False, server_default=text("0"))
     shots_attempted_teleop = Column(Integer, nullable=False, server_default=text("0"))
     
 
-    classified_amount = Column(Integer, nullable=False)
-    depot_amount = Column(Integer, nullable=False)
-    can_endgame_park = Column(Boolean, nullable=False)
-    ascent_level = Column(Integer, nullable=False)
 
     additional_info = Column(String, nullable=True)
 

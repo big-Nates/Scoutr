@@ -14,13 +14,9 @@ router = APIRouter(
 
 @router.post("/", response_model=schemas.SelfReportBase, status_code=status.HTTP_200_OK)
 def create_Self_Report(self_report_data: schemas.SelfReportCreate,db:Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(oauth2.get_current_user)):
-    if current_user.role != "team_admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"User with id {current_user._id} cannot create Self Reports"
-        )
     db.query(models.SelfReport).filter(models.SelfReport.team_number == current_user.team_number).update({models.SelfReport.is_newest: False})
     newest_self_report = models.SelfReport(user_id = current_user._id,  
+                                           team_number = current_user.team_number,
                                            **self_report_data.model_dump())
     db.add(newest_self_report)
     db.commit()

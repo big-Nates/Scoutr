@@ -93,7 +93,7 @@ export default function Reports() {
             </Pressable>
             <View style={styles.searchBox}>
               <TextInput
-                placeholder="Search Team Name"
+                placeholder="Search Team Number"
                 value={query}
                 onChangeText={setQuery}
                 autoCapitalize="none"

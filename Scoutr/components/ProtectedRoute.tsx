@@ -42,7 +42,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   if (authorized === null) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="small" />
+        <ActivityIndicator size="large" />
       </View>
     );
   }

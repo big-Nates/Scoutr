@@ -12,14 +12,14 @@ type NumberSelectorProps = {
 export default function DataFormRecorder({ value, onChange }: NumberSelectorProps) {
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => onChange(value - 1)} disabled={value === 0} >
-        <Text style={{ fontSize: 2 }}>-</Text>
+      <TouchableOpacity onPress={() => onChange(value - 1)} style={{ padding: 10 }} disabled={value === 0} >
+        <Text style={{ fontSize: 40 }}>-</Text>
       </TouchableOpacity>
 
-      <Text style={{ marginHorizontal: 10, fontSize: 20 }}>{value}</Text>
+      <Text style={{ marginHorizontal: 35, fontSize: 20 }}>{value}</Text>
 
       <TouchableOpacity onPress={() => onChange(value + 1)} style={{ padding: 10 }}>
-        <Text style={{ fontSize: 20 }}>+</Text>
+        <Text style={{ fontSize: 40 }}>+</Text>
       </TouchableOpacity>
     </View>
   );
@@ -27,10 +27,11 @@ export default function DataFormRecorder({ value, onChange }: NumberSelectorProp
 const styles = StyleSheet.create({
     container:{
         width: width * 0.55 * 0.25,
-        height: height * 0.4 * 0.5 ,
+        height: height * 0.4 * 0.5 * 0.3 ,
         flexDirection: "row", 
+        justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "black",
+        
     },
 })
 

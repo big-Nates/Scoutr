@@ -36,7 +36,7 @@ const TeamCard: React.FC<TeamCardProps> = ({ data }) => {
     : "Post Master"
   : data.can_deposit_far
     ? "Sharp Shooter"
-    : "Depot Demon";
+    : "Defensive Demon";
     return(
     
     <View>

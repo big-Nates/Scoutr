@@ -48,14 +48,21 @@ def create_match_report(season:int, event_code: str, match_report_data: schemas.
         if team["teamNumber"] == match_report_data.team_number:
             break
     else:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Team #{match_report_data.team_number} was not in {match_report_data.tournament_level} #{match_report_data.match_number}"
-        )
+        if match_report_data.tournament_level == "Quals":
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Team #{match_report_data.team_number} was not in Qualifier #{match_report_data.match_number}"
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Team #{match_report_data.team_number} was not in Playoff Match #{match_report_data.match_number}"
+            )
     
     #Check to see if report was already created
     queried_report = db.query(models.MatchReport).filter(models.MatchReport.user_id == current_user._id, 
                                                          models.MatchReport.team_number == match_report_data.team_number, 
+                                                         models.MatchReport.creator_team_number == current_user.team_number,
                                                          models.MatchReport.match_number == match_report_data.match_number,
                                                          models.MatchReport.tournament_level == match_report_data.tournament_level,
                                                          models.MatchReport.event_id == event_code
@@ -66,7 +73,7 @@ def create_match_report(season:int, event_code: str, match_report_data: schemas.
             detail=f"Report for team {match_report_data.team_number} was already made by {current_user.first_name} {current_user.last_name_initial}."
         )
     
-    created_match_report = models.MatchReport(event_id = event_code, user_id = current_user._id, season = season, **match_report_data.model_dump())
+    created_match_report = models.MatchReport(event_id = event_code, user_id = current_user._id, creator_team_number = current_user.team_number, season = season, **match_report_data.model_dump())
     db.add(created_match_report)
     db.commit()
     db.refresh(created_match_report)

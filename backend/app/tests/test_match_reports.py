@@ -36,7 +36,7 @@ def sample_match_reports(client, auth_header, test_fixture_create_user, test_fix
         "can_motif_in_auto": True,
 
         "classified_amount": 15,
-        "depot_amount": 2,
+        "motif_amount_teleop": 2,
         "can_endgame_park": False,
         "ascent_level": 2,
 

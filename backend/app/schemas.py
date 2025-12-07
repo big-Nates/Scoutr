@@ -52,7 +52,7 @@ class SelfReportBase(ConfigBase):
     motif_amount_auto: int
 
     classified_amount_teleop: int
-    depot_amount_teleop: int
+    motif_amount_teleop: int
     overflow_amount_teleop: int
 
     average_collection_time: Optional[float] = None
@@ -66,7 +66,7 @@ class SelfReportBase(ConfigBase):
     additional_info: Optional[str] = None
 
 class SelfReportCreate(SelfReportBase):
-    team_number: int
+    pass
 
 class SelfReportFullDisplay(SelfReportBase):
     id: int = Field(alias="_id")
@@ -78,7 +78,7 @@ class SelfReportIconDisplay(BaseModel):
     team_number: int
     profile_img_url: Optional[str] = None
     classified_amount_auto: int
-    can_collect_from_human_player: bool
+    can_park_two_robots: bool
     can_deposit_close: bool
     can_deposit_far: bool
 
@@ -87,24 +87,23 @@ class SelfReportIconDisplay(BaseModel):
 
 class MatchReportBase(ConfigBase):
     is_public: bool
-
     team_number: int
     match_number: int
     tournament_level: str
 
 
     classified_amount_auto: int
-    overflow_amount_auto: Optional[int] = 0
-    can_collect_from_human_player: bool
-    can_deposit_close: bool
-    can_deposit_far: bool
-    can_leave: bool
-    can_motif_in_auto: bool
+    overflow_amount_auto: int
+    motif_amount_auto: int
 
-    classified_amount: int
-    depot_amount: int
-    can_endgame_park: bool
-    ascent_level: int
+    classified_amount_teleop: int
+    motif_amount_teleop: int
+    overflow_amount_teleop: int
+
+    shots_made_auto: int
+    shots_attempted_auto: int
+    shots_made_teleop: int
+    shots_attempted_teleop: int
 
     additional_info: Optional[str] = "No additional info about the team"
 
