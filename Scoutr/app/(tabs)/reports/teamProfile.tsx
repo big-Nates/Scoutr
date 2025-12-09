@@ -55,16 +55,61 @@ export default function TeamProfile() {
               <MaterialCommunityIcons name="chevron-left" size={40} color="#000000ff" onPress={() => router.navigate("/(tabs)/reports")} />
             </View>
             <Text style={styles.teamHeader}>
-              Helo World
+              Team #00000 - Robotics Team Name
             </Text>
           </View>
           <View style={styles.quickStats}>
-
+            <View style={styles.quickStat}>
+              <Text style={styles.quickStatText}>
+                Team Rank
+              </Text>
+              <Text style={styles.quickStatText}>
+                #00000
+              </Text>
+            </View>
+            <View style={styles.quickStat}>
+              <Text style={styles.quickStatText}>
+                Auto Rank
+              </Text>
+              <Text style={styles.quickStatText}>
+                #00000
+              </Text>
+            </View>
+            <View style={styles.quickStat}>
+              <Text style={styles.quickStatText}>
+                Teleop Rank
+              </Text>
+              <Text style={styles.quickStatText}>
+                #00000
+              </Text>
+            </View>
           </View>
           
           <View style={styles.generalStats}>
+            <View style={styles.generalStatsHeader}>
+              <Text style={styles.generalStatsType}>
+                Event Data
+              </Text>
+              <View style={styles.generalStatsFilter}>
+                <View style={styles.eventFilterView}>
+                  <Text>
+                    USCTCMP
+                  </Text>
+                  <MaterialIcons name="arrow-drop-down" size={30} color="#25292e" />
+                </View>
+                <View style={styles.statsTypeFilter}>
+                  <Text>
+                    Event
+                  </Text>
+                  <MaterialIcons name="arrow-drop-down" size={30} color="#25292e" />
+                </View>
+              </View>
+            </View>
+            <View style={styles.generalStatsBody}>
 
+            </View>
           </View>
+
           <View style={styles.reportQuerySection}>
             <View style={styles.matchReportSearch}>
 
@@ -92,7 +137,6 @@ const styles = StyleSheet.create({
     },
     teamInfo:{
       height: height * 0.1,
-      backgroundColor: "gray",
       flexDirection: "row",
       justifyContent: "center",
       alignItems: "center"
@@ -100,13 +144,73 @@ const styles = StyleSheet.create({
     navBar:{
       justifyContent: "center",
       position: "absolute",
-      left: 10,
+      left: 20,
       top: 17
     },
     teamHeader:{
       fontSize: 30,
       
+    },
+    quickStats:{
+      width: width * 0.45,
+      height: height * 0.15,
+      marginTop: height * 0.025,
+      alignSelf: "center",
+      flexDirection: "row",
+      justifyContent: "space-evenly",
+      alignItems: "center",
+    },
+    quickStat:{
+      width: width * 0.45 * 0.3,
+      height: height * 0.15 * 0.85,
+      flexDirection: "column",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    quickStatText:{
+      fontSize: 20,
+    },
+    generalStats:{
+      width: width * 0.85,
+      height: height * 0.5,
+      marginTop: height * 0.05,
+      alignSelf: "center",
+      borderWidth: 2,
+      borderRadius: 15,
+    },
+    generalStatsHeader:{
+      width: width * 0.82,
+      height: height * 0.5 * 0.15,
+      alignSelf: "center",
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    generalStatsType:{
+      fontSize: 20,
+    },
+    generalStatsFilter:{
+      width: width * 0.82 * 0.2,
+      height: height * 0.5 * 0.1,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    eventFilterView:{
+      height: height * 0.5 * 0.1,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "gray",
+      paddingLeft: 5,
+    },
+    statsTypeFilter:{
+      height: height * 0.5 * 0.1,
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: "gray",
+      paddingLeft: 5,
     }
+
 
     
   })
