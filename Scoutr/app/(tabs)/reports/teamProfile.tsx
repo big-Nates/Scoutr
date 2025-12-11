@@ -85,7 +85,7 @@ export default function TeamProfile() {
             </View>
           </View>
           
-          <View style={styles.generalStats}>
+          <ScrollView style={styles.generalStats}>
             <View style={styles.generalStatsHeader}>
               <Text style={styles.generalStatsType}>
                 Event Data
@@ -106,9 +106,101 @@ export default function TeamProfile() {
               </View>
             </View>
             <View style={styles.generalStatsBody}>
+              <View style={styles.generalStatsTopRowView}>
+                <Text style={styles.generalStatsRowHeader}>
+                  Teleop Averages
+                </Text>
+                <View style={styles.generalStatsRow}>
+                  <View style={styles.generalStatsRowEntry}>
+                    <Text style={styles.generalStatsRowEntryHeader}>
 
+                    </Text>
+                    <Text style={styles.generalStatsRowEntryData}>
+
+                    </Text>
+                  </View>
+                  <View style={styles.generalStatsRowEntry}>
+                    <Text style={styles.generalStatsRowEntryHeader}>
+
+                    </Text>
+                    <Text style={styles.generalStatsRowEntryData}>
+
+                    </Text>
+                  </View>
+                  <View style={styles.generalStatsRowEntry}>
+                    <Text style={styles.generalStatsRowEntryHeader}>
+
+                    </Text>
+                    <Text style={styles.generalStatsRowEntryData}>
+
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View style={styles.generalStatsRowView}>
+                <Text style={styles.generalStatsRowHeader}>
+                  Auto Averages
+                </Text>
+                <View style={styles.generalStatsRow}>
+                  <View style={styles.generalStatsRowEntry}>
+                    <Text style={styles.generalStatsRowEntryHeader}>
+
+                    </Text>
+                    <Text style={styles.generalStatsRowEntryData}>
+
+                    </Text>
+                  </View>
+                  <View style={styles.generalStatsRowEntry}>
+                    <Text style={styles.generalStatsRowEntryHeader}>
+
+                    </Text>
+                    <Text style={styles.generalStatsRowEntryData}>
+
+                    </Text>
+                  </View>
+                  <View style={styles.generalStatsRowEntry}>
+                    <Text style={styles.generalStatsRowEntryHeader}>
+
+                    </Text>
+                    <Text style={styles.generalStatsRowEntryData}>
+
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <View style={styles.generalStatsRowView}>
+                <Text style={styles.generalStatsRowHeader}>
+                  Accuracy Averages
+                </Text>
+                <View style={styles.generalStatsRow}>
+                  <View style={styles.generalStatsRowEntry}>
+                    <Text style={styles.generalStatsRowEntryHeader}>
+
+                    </Text>
+                    <Text style={styles.generalStatsRowEntryData}>
+
+                    </Text>
+                  </View>
+                  <View style={styles.generalStatsRowEntry}>
+                    <Text style={styles.generalStatsRowEntryHeader}>
+
+                    </Text>
+                    <Text style={styles.generalStatsRowEntryData}>
+
+                    </Text>
+                  </View>
+                  <View style={styles.generalStatsRowEntry}>
+                    <Text style={styles.generalStatsRowEntryHeader}>
+
+                    </Text>
+                    <Text style={styles.generalStatsRowEntryData}>
+
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
-          </View>
+          </ScrollView>
 
           <View style={styles.reportQuerySection}>
             <View style={styles.matchReportSearch}>
@@ -209,7 +301,37 @@ const styles = StyleSheet.create({
       alignItems: "center",
       backgroundColor: "gray",
       paddingLeft: 5,
-    }
+    },
+    generalStatsBody:{
+      width: width * 0.82,
+      alignSelf: "center",
+      flexDirection: "column",
+      justifyContent: "space-evenly",
+    },
+    generalStatsTopRowView:{
+      width: width * 0.82,
+      height: height * 0.5 * 0.83 * 0.4,
+      marginTop: 10,
+      marginBottom: height * 0.5 * 0.83 * 0.1,
+    },
+    generalStatsRowView:{
+      width: width * 0.82,
+      height: height * 0.5 * 0.83 * 0.4,
+      marginBottom: height * 0.5 * 0.83 * 0.1,
+    },
+    generalStatsRowHeader:{
+      fontSize: 20
+    },
+    generalStatsRow:{
+      height: height * 0.5 * 0.83 * 0.35,
+      width: width * 0.82,
+    },
+    generalStatsRowEntry:{
+      height: height * 0.5 * 0.83 * 0.35,
+      width: width * 0.82 * 0.3,
+      flexDirection: "column",
+      justifyContent: "space-between"
+    },
 
 
     
