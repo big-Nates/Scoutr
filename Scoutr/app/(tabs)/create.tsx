@@ -17,7 +17,7 @@ export default function Create() {
   // Dropdown state
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [matchdropdownVisible, setMatchDropdownVisible] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("Team"); // default
+  const [selectedOption, setSelectedOption] = useState("Team"); 
   const [selectedMatchOption, setSelectionMatchOption] = useState("Quals")
 
   const showAlert = (title: string, message: any) => {
@@ -222,9 +222,9 @@ export default function Create() {
     <View style={styles.container}>
       <ScrollView 
         style={styles.infoScroll}
-        showsVerticalScrollIndicator={false}   // keeps it visible
-        indicatorStyle="black"                // iOS only: can be 'black' or 'white'
-        scrollIndicatorInsets={{ right: 2 }}  // small padding from the edge
+        showsVerticalScrollIndicator={false}   
+        indicatorStyle="black"                
+        scrollIndicatorInsets={{ right: 2 }}  
       >
         <View style={styles.container}>
           <View style={styles.header}>
