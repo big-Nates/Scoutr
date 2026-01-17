@@ -40,7 +40,8 @@ class SelfReport(Base):
     _id = Column(Integer, primary_key=True, autoincrement=True)
     is_public = Column(Boolean, nullable=False)
 
-    team_number = Column(Integer, ForeignKey("teams.number"), nullable=False)
+    team_number = Column(Integer, nullable=False)
+    creator_team_number = Column(Integer, ForeignKey("teams.number"), nullable=False)
     user_id = Column(Integer, ForeignKey("users._id"), nullable=False)
     season = Column(Integer, nullable=False, server_default=text("2025"))
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
@@ -48,17 +49,15 @@ class SelfReport(Base):
     classified_amount_auto = Column(Integer, nullable=False, server_default=text("0"))
     overflow_amount_auto = Column(Integer, nullable=False, server_default=text("0"))
     motif_amount_auto = Column(Integer, nullable=False, server_default=text("0"))
+    can_park_two_robots = Column(Boolean, nullable=False, server_default=text("FALSE"))
     
     classified_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
     motif_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
     overflow_amount_teleop = Column(Integer, nullable=False, server_default=text("0"))
 
-    average_collection_time = Column(Numeric(4,2), nullable = True, server_default=text("0"))
-    time_to_shoot = Column(Numeric(4,2), nullable = True, server_default=text("0"))
-    time_to_park = Column(Numeric(4,2), nullable = True, server_default=text("0"))
-    can_deposit_close = Column(Boolean, nullable=False, server_default=text("FALSE"))
-    can_deposit_far = Column(Boolean, nullable=False, server_default=text("FALSE"))
-    can_park_two_robots = Column(Boolean, nullable=False, server_default=text("FALSE"))
+    starting_position = Column(String, nullable=False, server_default=text("Close Zone"))
+    collection_position = Column(String, nullable=False, server_default=text("Classifier"))
+    scoring_position = Column(String, nullable=False, server_default=text("Close Zone"))
 
     additional_info = Column(String, nullable=True)
     is_newest = Column(Boolean, nullable=False, server_default=text("TRUE"), default=True)

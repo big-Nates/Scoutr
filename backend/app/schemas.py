@@ -45,6 +45,7 @@ class UserSafeDiplay(UserBase):
 
 class SelfReportBase(ConfigBase):
     is_public: bool
+    team_number: int
     season: int
 
     classified_amount_auto: int
@@ -54,13 +55,10 @@ class SelfReportBase(ConfigBase):
     classified_amount_teleop: int
     motif_amount_teleop: int
     overflow_amount_teleop: int
-
-    average_collection_time: Optional[float] = None
-    time_to_shoot: Optional[float] = None
-    time_to_park: Optional[float] = None
-
-    can_deposit_close: bool
-    can_deposit_far: bool
+    
+    starting_position: str
+    collection_position: str
+    scoring_position: str
     can_park_two_robots: bool
 
     additional_info: Optional[str] = None

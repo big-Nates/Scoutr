@@ -1,5 +1,5 @@
 import { Text, TextInput, View, ScrollView, Dimensions, StyleSheet, Pressable, Modal, Image, ActivityIndicator, Switch } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import api from "@/app/api/client";
@@ -8,132 +8,68 @@ import DataFormRecorder from "@/components/DataFormRecorder";
 const { width, height } = Dimensions.get("screen");
 
 export default function Create() {
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [alertTitle, setAlertTitle] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [userTeamNumber, setUserTeamNumber] = useState(0);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Dropdown state
-  const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [matchdropdownVisible, setMatchDropdownVisible] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("Team"); 
-  const [selectedMatchOption, setSelectionMatchOption] = useState("Quals")
-
-  const showAlert = (title: string, message: any) => {
-    const msg = typeof message === "string" ? message : JSON.stringify(message, null, 2);
-    setAlertTitle(title);
-    setAlertMessage(msg);
-    setAlertVisible(true);
-  };
-
-  const handleDropdownSelect = (option: string) => {
-    setSelectedOption(option);
-    setDropdownVisible(false);
-  };
-
-  const handleMatchDropdownSelect = (option: string) => {
-    setSelectionMatchOption(option);
-    setMatchDropdownVisible(false);
-    if(option === "Playoffs"){
-      matchFormData.tournament_level = "DoubleElim";
-    }else{
-      matchFormData.tournament_level = "Quals";
-    }
-    
-  };
-
+  //Report Data States
   interface ReportData {
     is_public: boolean;
     season: number;
-    classified_amount_auto: number;
-    overflow_amount_auto: number;
-    motif_amount_auto: number;
-    classified_amount_teleop: number;
-    motif_amount_teleop: number;
-    overflow_amount_teleop: number;
-    average_collection_time?: number;
-    time_to_shoot?: number;
-    time_to_park?: number;
-    can_deposit_close: boolean;
-    can_deposit_far: boolean;
-    can_park_two_robots: boolean;
-    additional_info?: string;
-  }
-
-  interface MatchReportData {
-    is_public: boolean;
-    season: number;
-    classified_amount_auto: number;
-    overflow_amount_auto: number;
-    motif_amount_auto: number;
-    classified_amount_teleop: number;
-    motif_amount_teleop: number;
-    overflow_amount_teleop: number;
-    average_collection_time?: number;
-    shots_made_auto: number;
-    shots_attempted_auto: number;
-    shots_made_teleop: number;
-    shots_attempted_teleop: number;
-    event_code: string;
-    match_number: number;
-    tournament_level: string;
     team_number: number;
-    additional_info?: string;
+    classified_amount_auto: number;
+    overflow_amount_auto: number;
+    motif_amount_auto: number;
+    classified_amount_teleop: number;
+    motif_amount_teleop: number;
+    overflow_amount_teleop: number;
+    starting_position: string;
+    collection_position: string;
+    scoring_position: string;
+    can_park_two_robots: boolean;
+    additional_info: string;
   }
 
   const defaultReportData: ReportData = {
     is_public: true,
     season: 2025,
+    team_number: 0,
     classified_amount_auto: 0,
     overflow_amount_auto: 0,
     motif_amount_auto: 0,
     classified_amount_teleop: 0,
     motif_amount_teleop: 0,
     overflow_amount_teleop: 0,
-    average_collection_time: undefined,
-    time_to_shoot: undefined,
-    time_to_park: undefined,
-    can_deposit_close: false,
-    can_deposit_far: false,
+    starting_position: "",
+    collection_position: "",
+    scoring_position: "",
     can_park_two_robots: false,
     additional_info: "",
   };
 
-  const defaultMatchReportData: MatchReportData = {
-    is_public: true,
-    season: 2026,
-    classified_amount_auto: 0,
-    overflow_amount_auto: 0,
-    motif_amount_auto: 0,
-    classified_amount_teleop: 0,
-    motif_amount_teleop: 0,
-    overflow_amount_teleop: 0,
-    shots_made_auto: 0,
-    shots_attempted_auto: 0,
-    shots_made_teleop: 0,
-    shots_attempted_teleop: 0,
-    event_code: "USCTCMP",
-    match_number: 0,
-    tournament_level: "Quals",
-    team_number: 0,
-    additional_info: "",
-  };
+  const setNoAutonomous = () =>{
+    handleNumberInput("classified_amount_auto")("0");
+    handleNumberInput("overflow_amount_auto")("0");
+    handleNumberInput("motif_amount_auto")("0");
+  }
+
+  const [scoreBonus, setScoreBonus] = useState(0);
+
+  const fetchUserData = async () => {
+      try {
+        const data = await api.get("users/me");;
+        setUserTeamNumber(data.data.team_number);
+      } catch (err) {
+        console.error("Error fetching user team number:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  useEffect(() => {
+    fetchUserData();
+  }, []);
 
   const [formData, setFormData] = useState<ReportData>(defaultReportData);
-  const [matchFormData, setMatchFormData] = useState<MatchReportData>(defaultMatchReportData);
-  const [textHeight, setTextHeight] = useState(height * 0.75 * 0.3);
-
-  const handleDataEntry = async (form: ReportData) => {
-    try {
-      const response = await api.post("self_reports/", form);
-      console.log("Created item:", response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error("Error creating report:", error.response?.data || error.message.detail);
-      throw error;
-    }
-  };
 
   const handleNumberInput = (field: keyof ReportData, allowDecimal = false) => (text: string) => {
     let numericText = allowDecimal ? text.replace(/[^0-9.]/g, "") : text.replace(/[^0-9]/g, "");
@@ -154,61 +90,96 @@ export default function Create() {
     }));
   };
 
-  const handleDataEntryMatchReport = async (form: MatchReportData) => {
-    try {
-      const response = await api.post("match_reports/"+2024+"/"+form.event_code, form);
-      console.log("Created item:", response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error("Error creating report:", error.response?.data || error.message);
-      throw error;
+  const setAscentBonus = () => {
+    handleBooleanChange("can_park_two_robots")(!formData.can_park_two_robots); 
+    if(!formData.can_park_two_robots){
+      setScoreBonus(15);
+    }else{
+      setScoreBonus(0);
     }
-  };
+  }
 
-  const onSubmit = async () => {
-    if(selectedOption === "Team"){
-      try {
-        setLoading(true);
-        const response = await handleDataEntry(formData);
-        showAlert("Success!", "Report created successfully.");
-      } catch (err: any) {
-        console.error("Submission failed:", err);
-        showAlert("Error", err.response?.data || err.message || "Failed to create report.");
-      } finally {
-        setLoading(false);
+
+  // Dropdown state
+  const [selectedOption, setSelectedOption] = useState("Team"); 
+  type ActiveModal = "none" | "reportType" | "startingPosMap" | "collectionPosMap" | "scoringPosMap";
+  const [activeModal, setActiveModal] = useState<ActiveModal>("none");
+  const handleDropdownSelect = (option: string) => {
+    setSelectedOption(option);
+    setActiveModal("none");
+  };
+  
+  const startPoses = ['Close Zone', 'Far Zone'];
+  const [chosenStart, setChosenStart] = useState(0);
+  const [tempChosenStart, tempSetChosenStart] = useState(0);
+  const handleStartPosesSelect = (increment: boolean) => {
+    if(increment){
+      if(tempChosenStart !== 1){
+        tempSetChosenStart(prevCount => prevCount + 1);
+      }else{
+        tempSetChosenStart(0);
       }
     }else{
-      try {
-        setLoading(true);
-        const response = await handleDataEntryMatchReport(matchFormData);
-        showAlert("Success!", "Match Report created successfully.");
-      } catch (err: any) {
-        console.error("Submission failed:", err);
-        showAlert("Error", err.response?.data.detail || err.message.detail || "Failed to create match report.");
-      } finally {
-        setLoading(false);
+      if(tempChosenStart !== 0){
+        tempSetChosenStart(prevCount => prevCount - 1);
+      }else{
+        tempSetChosenStart(1);
       }
     }
-    
   };
+  const handleStartPoseConfirmation = () => {
+    setChosenStart(tempChosenStart);
+    setActiveModal("none");
+  }
 
-  const handleAlertDismiss = () => {
-    setAlertVisible(false);
-    router.push(`/reports`);
+  const collectionPoses = ['Human Player', 'Secret Tunnel', "Classifier"];
+  const [chosenCollection, setCollection] = useState(0);
+  const [tempChosenCollection, tempSetCollection] = useState(0);
+  const handleCollectionPosesSelect = (increment: boolean) => {
+    if(increment){
+      if(tempChosenCollection !== 2){
+        tempSetCollection(prevCount => prevCount + 1);
+      }else{
+        tempSetCollection(0);
+      }
+    }else{
+      if(tempChosenCollection !== 0){
+        tempSetCollection(prevCount => prevCount - 1);
+      }else{
+        tempSetCollection(1);
+      }
+    }
   };
-  // Auto period
-  const [overflowCountAuto, setOverflowCountAuto] = useState(0);
-  const [motifCountAuto, setMotifCountAuto] = useState(0);
-  const [classifiedCountAuto, setClassifiedCountAuto] = useState(0);
+  const handleCollectionPoseConfirmation = () => {
+    setCollection(tempChosenCollection);
+    setActiveModal("none");
+  }
 
-  // TeleOp period
-  const [overflowCountTeleop, setOverflowCountTeleop] = useState(0);
-  const [classifiedCountTeleop, setClassifiedCountTeleop] = useState(0);
-  const [motifCountTeleop, setMotifCountTeleop] = useState(0);
+  const scoringPoses = ['Close Zone', 'Far Zone'];
+  const [chosenScoring, setChosenScoring] = useState(0);
+  const [tempChosenScoring, tempSetChosenScoring] = useState(0);
+  const handleScoringPosesSelect = (increment: boolean) => {
+    if(increment){
+      if(tempChosenScoring !== 1){
+        tempSetChosenScoring(prevCount => prevCount + 1);
+      }else{
+        tempSetChosenScoring(0);
+      }
+    }else{
+      if(tempChosenScoring !== 0){
+        tempSetChosenScoring(prevCount => prevCount - 1);
+      }else{
+        tempSetChosenScoring(1);
+      }
+    }
+  };
+  const handleScoringPoseConfirmation = () => {
+    setChosenScoring(tempChosenScoring);
+    setActiveModal("none");
+  }
 
-  const [eventQuery, setEventQuery] = useState("");
   
-
+  
 
   if (loading) {
     return (
@@ -228,11 +199,10 @@ export default function Create() {
       >
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.headerText}>Create Report</Text>
             <View style={styles.selectorView}>
               <Pressable
                 style={{ flexDirection: "row", alignItems: "center" }}
-                onPress={() => setDropdownVisible(true)}
+                onPress={() => setActiveModal("reportType")}
               >
                 <Text style={styles.headerText}>{selectedOption}</Text>
                 <MaterialIcons name="arrow-drop-down" size={30} color="#25292e" />
@@ -241,19 +211,19 @@ export default function Create() {
           </View>
           {/* Dropdown Modal */}
           <Modal
-            visible={dropdownVisible}
+            visible={activeModal === "reportType"}
             transparent
             animationType="fade"
-            onRequestClose={() => setDropdownVisible(false)}
+            onRequestClose={() => setActiveModal("none")}
           >
             <Pressable
               style={{
                 flex: 1,
-                backgroundColor: "rgba(0,0,0,0.3)",
+                backgroundColor: "rgba(0, 0, 0, 0.3)",
                 justifyContent: "center",
                 alignItems: "center",
               }}
-              onPress={() => setDropdownVisible(false)}
+              onPress={() => setActiveModal("none")}
             >
               <View
                 style={{
@@ -278,491 +248,533 @@ export default function Create() {
               </View>
             </Pressable>
           </Modal>
-          <Modal
-            visible={matchdropdownVisible}
+
+          <Modal 
+            visible={activeModal === "startingPosMap"}
             transparent
             animationType="fade"
-            onRequestClose={() => setMatchDropdownVisible(false)}
+            onRequestClose={() => setActiveModal("none")}
           >
             <Pressable
               style={{
                 flex: 1,
-                backgroundColor: "rgba(0,0,0,0.3)",
+                backgroundColor: "rgba(0, 0, 0, 0.3)",
                 justifyContent: "center",
                 alignItems: "center",
               }}
-              onPress={() => setMatchDropdownVisible(false)}
+              onPress={() => setActiveModal("none")}
             >
-              <View
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: 8,
-                  width: width * 0.5,
-                  paddingVertical: 10,
-                }}
-              >
-                {["Quals", "Playoffs"].map((option) => (
-                  <Pressable
-                    key={option}
-                    style={{
-                      paddingVertical: 10,
-                      paddingHorizontal: 20,
-                    }}
-                    onPress={() => handleMatchDropdownSelect(option)}
-                  >
-                    <Text style={{ fontSize: 18 }}>{option}</Text>
+              <View style={styles.startingPosModalView}>
+                <View style={styles.startingPosModalHeader}>
+                  <Text style={{fontSize: 20}}>
+                    Starting Positions
+                  </Text>
+                </View>
+                <View style={styles.selectorView}>
+                  <Pressable onPress={()=>handleStartPosesSelect(false)}>
+                    <MaterialIcons name="keyboard-arrow-left" size={50}/>
                   </Pressable>
-                ))}
+                  
+                  <Image source={require("@/assets/images/FTCfield.png")} style={styles.startingPosModalImage}/>
+                  <Pressable onPress={()=>handleStartPosesSelect(true)}>
+                    <MaterialIcons name="keyboard-arrow-right" size={50}/>
+                  </Pressable>
+                </View>
+                <View>
+                  <Text style={{fontSize: 18}}>
+                    {startPoses[tempChosenStart]}
+                  </Text>
+                </View>
+                <Pressable 
+                style={styles.startingPosConfirmButton}
+                onPress={()=>handleStartPoseConfirmation()}
+                >
+                  <Text style={{fontSize: 20}}>
+                    Confirm
+                  </Text>
+                </Pressable>               
               </View>
             </Pressable>
           </Modal>
-          {selectedOption === "Team" ? 
-          (<>
-            {/* Auto Section */}
-            <View style={styles.formBody}>
-              <View style={styles.simpleDataView}>
-                <View style={styles.autoRowView}>
-                  <Text style={styles.headerText}>Autonomous Scoring</Text>
-                  <View style={styles.autoRowEntries}>
-                    <View style={styles.rowEntry}>
-                      <Text style={styles.dataFormHeaderText}>Classified</Text>
-                      <TextInput
-                        style={styles.dataInput}
-                        keyboardType="numeric"
-                        placeholder="0"
-                        value={String(formData.classified_amount_auto || "")}
-                        onChangeText={handleNumberInput("classified_amount_auto")}
-                      />
-                    </View>
-                    <View style={styles.rowEntry}>
-                      <Text style={styles.dataFormHeaderText}>Overflow</Text>
-                      <TextInput
-                        style={styles.dataInput}
-                        keyboardType="numeric"
-                        placeholder="0"
-                        value={String(formData.overflow_amount_auto || "")}
-                        onChangeText={handleNumberInput("overflow_amount_auto")}
-                      />
-                    </View>
-                    <View style={styles.rowEntry}>
-                      <Text style={styles.dataFormHeaderText}>Motif Count</Text>
-                      <TextInput
-                        style={styles.dataInput}
-                        keyboardType="numeric"
-                        placeholder="0"
-                        value={String(formData.motif_amount_auto || "")}
-                        onChangeText={handleNumberInput("motif_amount_auto")}
-                      />
-                    </View>
-                  </View>
-                </View>
 
-                {/* TeleOp Section */}
-                <View style={styles.teleOpRowView}>
-                  <Text style={styles.headerText}>Tele-Op Scoring</Text>
-                  <View style={styles.teleOpRowEntries}>
-                    <View style={styles.rowEntry}>
-                      <Text style={styles.dataFormHeaderText}>Classified</Text>
-                      <TextInput
-                        style={styles.dataInput}
-                        keyboardType="numeric"
-                        placeholder="0"
-                        value={String(formData.classified_amount_teleop || "")}
-                        onChangeText={handleNumberInput("classified_amount_teleop")}
-                      />
-                    </View>
-                    <View style={styles.rowEntry}>
-                      <Text style={styles.dataFormHeaderText}>Overflow</Text>
-                      <TextInput
-                        style={styles.dataInput}
-                        keyboardType="numeric"
-                        placeholder="0"
-                        value={String(formData.overflow_amount_teleop || "")}
-                        onChangeText={handleNumberInput("overflow_amount_teleop")}
-                      />
-                    </View>
-                    <View style={styles.rowEntry}>
-                      <Text style={styles.dataFormHeaderText}>Motif Count</Text>
-                      <TextInput
-                        style={styles.dataInput}
-                        keyboardType="numeric"
-                        placeholder="0"
-                        value={String(formData.motif_amount_teleop || "")}
-                        onChangeText={handleNumberInput("motif_amount_teleop")}
-                      />
-                    </View>
-                  </View>
+          <Modal 
+            visible={activeModal === "collectionPosMap"}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setActiveModal("none")}
+          >
+            <Pressable
+              style={{
+                flex: 1,
+                backgroundColor: "rgba(0, 0, 0, 0.3)",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => setActiveModal("none")}
+            >
+              <View style={styles.startingPosModalView}>
+                <View style={styles.startingPosModalHeader}>
+                  <Text style={{fontSize: 20}}>
+                    Starting Positions
+                  </Text>
                 </View>
-              </View>
-
-              {/* Heatmap Section */}
-              <View style={styles.heatMapView}>
-                <View style={styles.heatMapHeader}>
-                  <Text style={{ fontSize: 24 }}>Heat Map</Text>
-                  {/* <MaterialIcons name="arrow-drop-down" size={30} color="#25292e" /> */}
-                </View>
-                <View style={styles.heatMapContainer}>
-                  <Pressable>
-                    <Image source={require("@/assets/images/FTCfield.png")} style={styles.image} />
+                <View style={styles.selectorView}>
+                  <Pressable onPress={()=>handleCollectionPosesSelect(false)}>
+                    <MaterialIcons name="keyboard-arrow-left" size={50}/>
+                  </Pressable>
+                  
+                  <Image source={require("@/assets/images/FTCfield.png")} style={styles.startingPosModalImage}/>
+                  <Pressable onPress={()=>handleCollectionPosesSelect(true)}>
+                    <MaterialIcons name="keyboard-arrow-right" size={50}/>
                   </Pressable>
                 </View>
-                <View style={styles.heatMapButtonView}>
-                  <Text style={styles.headerText}>Coming Soon!</Text>
+                <View>
+                  <Text style={{fontSize: 18}}>
+                    {collectionPoses[tempChosenCollection]}
+                  </Text>
                 </View>
+                <Pressable 
+                style={styles.startingPosConfirmButton}
+                onPress={()=>handleCollectionPoseConfirmation()}
+                >
+                  <Text style={{fontSize: 20}}>
+                    Confirm
+                  </Text>
+                </Pressable>               
               </View>
-            </View>
+            </Pressable>
+          </Modal>
 
-            {/* Advanced Metrics */}
-            <View style={styles.advancedInfo}>
-              <Text style={styles.headerText}>Advanced Metrics</Text>
-
-              {/* Numeric Fields */}
-              <View style={styles.advancedRowEntries}>
-                <View style={styles.advancedRowEntry}>
-                  <Text style={styles.dataFormHeaderText}>Avg. Collection Time</Text>
-                  <TextInput
-                    style={styles.dataInput}
-                    keyboardType="numeric"
-                    placeholder="0"
-                    value={String(formData.average_collection_time || "")}
-                    onChangeText={handleNumberInput("average_collection_time", true)}
-                  />
+          <Modal 
+            visible={activeModal === "scoringPosMap"}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setActiveModal("none")}
+          >
+            <Pressable
+              style={{
+                flex: 1,
+                backgroundColor: "rgba(0, 0, 0, 0.3)",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => setActiveModal("none")}
+            >
+              <View style={styles.startingPosModalView}>
+                <View style={styles.startingPosModalHeader}>
+                  <Text style={{fontSize: 20}}>
+                    Starting Positions
+                  </Text>
                 </View>
-                <View style={styles.advancedRowEntry}>
-                  <Text style={styles.dataFormHeaderText}>Time to Shoot</Text>
-                  <TextInput
-                    style={styles.dataInput}
-                    keyboardType="numeric"
-                    placeholder="0"
-                    value={String(formData.time_to_shoot || "")}
-                    onChangeText={handleNumberInput("time_to_shoot", true)}
-                  />
+                <View style={styles.selectorView}>
+                  <Pressable onPress={()=>handleScoringPosesSelect(false)}>
+                    <MaterialIcons name="keyboard-arrow-left" size={50}/>
+                  </Pressable>
+                  
+                  <Image source={require("@/assets/images/FTCfield.png")} style={styles.startingPosModalImage}/>
+                  <Pressable onPress={()=>handleScoringPosesSelect(true)}>
+                    <MaterialIcons name="keyboard-arrow-right" size={50}/>
+                  </Pressable>
                 </View>
-                <View style={styles.advancedRowEntry}>
-                  <Text style={styles.dataFormHeaderText}>Time to Park</Text>
-                  <TextInput
-                    style={styles.dataInput}
-                    keyboardType="numeric"
-                    placeholder="0"
-                    value={String(formData.time_to_park || "")}
-                    onChangeText={handleNumberInput("time_to_park", true)}
-                  />
+                <View>
+                  <Text style={{fontSize: 18}}>
+                    {scoringPoses[tempChosenScoring]}
+                  </Text>
                 </View>
+                <Pressable 
+                style={styles.startingPosConfirmButton}
+                onPress={()=>handleScoringPoseConfirmation()}
+                >
+                  <Text style={{fontSize: 20}}>
+                    Confirm
+                  </Text>
+                </Pressable>               
               </View>
-
-              {/* Switch Toggles */}
-              <View style={styles.toggleSection}>
-                <View style={styles.toggleEntry}>
-                  <Text style={styles.dataFormHeaderText}>Can Deposit Close?</Text>
-                  <Switch
-                    value={formData.can_deposit_close}
-                    onValueChange={handleBooleanChange("can_deposit_close")}
-                    thumbColor={formData.can_deposit_close ? "#4CAF50" : "#f4f3f4"}
-                    trackColor={{ false: "#767577", true: "#81b0ff" }}
-                  />
-                </View>
-                <View style={styles.toggleEntry}>
-                  <Text style={styles.dataFormHeaderText}>Can Deposit Far?</Text>
-                  <Switch
-                    value={formData.can_deposit_far}
-                    onValueChange={handleBooleanChange("can_deposit_far")}
-                    thumbColor={formData.can_deposit_far ? "#4CAF50" : "#f4f3f4"}
-                    trackColor={{ false: "#767577", true: "#81b0ff" }}
-                  />
-                </View>
-                <View style={styles.toggleEntry}>
-                  <Text style={styles.dataFormHeaderText}>Can Park Two Robots?</Text>
-                  <Switch
-                    value={formData.can_park_two_robots}
-                    onValueChange={handleBooleanChange("can_park_two_robots")}
-                    thumbColor={formData.can_park_two_robots ? "#4CAF50" : "#f4f3f4"}
-                    trackColor={{ false: "#767577", true: "#81b0ff" }}
-                  />
-                </View>
-              </View>
-
-              {/* Additional Info */}
-              <View style={styles.additionalInfoSection}>
-                <Text style={styles.headerText}>Additional Information</Text>
-                <TextInput
-                  style={[styles.additionalInput, { height: textHeight }]}
-                  placeholder="Add any notes or observations..."
-                  placeholderTextColor="#555"
-                  multiline
-                  onContentSizeChange={(e) => setTextHeight(e.nativeEvent.contentSize.height)}
-                  value={formData.additional_info}
-                  onChangeText={(text) =>
-                    setFormData((prev) => ({ ...prev, additional_info: text }))
+            </Pressable>
+          </Modal>
+          
+          {selectedOption === "Team" ? 
+          (<>
+            <View style={styles.teamReportInfoView}>
+              <View 
+                style={formData.is_public ? styles.privacyView : styles.privacyViewGrayed}
+              >
+                <Pressable
+                  onPress={() =>
+                    handleBooleanChange("is_public")(true)
                   }
-                />
+                >
+                  <View style={styles.privacyViewLeft}>
+                    <Text style={{fontSize: 16}}>
+                      Public
+                    </Text>
+                  </View>
+                </Pressable>
+
+                <Pressable
+                  onPress={() =>
+                    handleBooleanChange("is_public")(false)
+                  }
+                >
+                  <View 
+                    style={formData.is_public ? styles.privacyViewRight : styles.privacyViewRightSelected}
+                  >
+                    <Text style={{fontSize: 16}}>
+                      Private
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
+              <View style={styles.teamNumberView}>
+                <Text style={{fontSize: 20}}>
+                  Team Search
+                </Text>
+                <View style={{borderBottomWidth: 1}}>
+                  <TextInput
+                    placeholder="Enter a Team Number"
+                    placeholderTextColor={"gray"}
+                    style={{fontSize:16}}
+                    keyboardType="numeric"
+                    value={String(formData.team_number || "")}
+                    onChangeText={handleNumberInput("team_number")}
+                  />
+                </View>
+              </View>
+              
+              <Pressable 
+                style={styles.selfReportButton}
+                onPress={()=>{handleNumberInput("team_number")(String(userTeamNumber))}}
+              >
+                <Text style={{fontSize: 16}}>
+                  Self Report
+                </Text>
+              </Pressable>
+            </View>
+            </>
+          ):(<>
+            <View style={styles.matchReportInfoView}>
+              <View style={styles.privacyView}>
+                <View style={styles.privacyViewLeft}>
+                  <Text style={{fontSize: 16}}>
+                    Public
+                  </Text>
+                </View>
+                <View style={styles.privacyViewRight}>
+                  <Text style={{fontSize: 16}}>
+                    Private
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.matchReportDetailsScrollView}>
+                <ScrollView
+                  horizontal={true}
+                >
+                  <View style={styles.teamNumberView}>
+                    <Text style={{fontSize: 20}}>
+                      Event Search
+                    </Text>
+                    <View style={{borderBottomWidth: 1}}>
+                      <TextInput
+                        placeholder="Enter an Event Code"
+                        style={{fontSize:16}}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.teamNumberView}>
+                    <Text style={{fontSize: 20}}>
+                      Team Search
+                    </Text>
+                    <View style={{borderBottomWidth: 1}}>
+                      
+                      <TextInput
+                        placeholder="Enter a Team Number"
+                        style={{fontSize:16}}
+                      />
+                    </View>
+                  </View>
+
+                  <View style={styles.teamNumberView}>
+                    <Text style={{fontSize: 20}}>
+                      Match Number
+                    </Text>
+                    <View style={{ flexDirection: "row", alignItems: "center"}}>
+                      <Text style={{paddingRight: width * 0.45 * 0.025, fontSize: 16}}>
+                        Quals
+                      </Text>
+                      <MaterialIcons style={{paddingRight: width * 0.45 * 0.1, fontSize: 16}} name="arrow-drop-down" size={16} />
+                      <TextInput
+                        placeholder="Match #"
+                        style={{fontSize:16, width: width *0.45 * 0.4, borderBottomWidth: 1}}
+                      />
+                    </View>
+                  </View>
+                  
+                </ScrollView>
               </View>
             </View>
             </>
-            ):(<>
-              <View style={styles.matchBody}>
-                <Text style={styles.headerText}>
-                  Match Info
+          )}
+
+          <View style={styles.autoRecordView}>
+            <View style={styles.headerView}>
+              <Text style={{fontSize:20}}>
+                Autonomous Scoring
+              </Text>
+              <Pressable 
+                style={styles.autoCheckBoxButton}
+                onPress={()=>{setNoAutonomous()}}
+              >
+                <Text>
+                  No Autonomous
                 </Text>
-                <View style={styles.matchSearchParams}>
-                  <View style={styles.eventSearch}>
-                    <Text style={styles.paramHeaderText}>
-                      Event
-                    </Text>
-                    <View style={styles.searchBox}>
-                      <TextInput
-                        placeholder="Search Event Code"
-                        value={String(matchFormData.event_code)}
-                        onChangeText={(val) =>
-                            setMatchFormData((prev) => ({ ...prev, event_code: val }))
-                        }
-                        autoCapitalize="words"
-                        style={styles.matchSearchBox}
-                      />
-                      <MaterialIcons name="search" size={30} color="#25292e" />
-                    </View>
-                  </View>
-                  <View style={styles.matchSearch}>
-                    <Text style={styles.paramHeaderText}>
-                      Match Number
-                    </Text>
-                    <View style={{flexDirection: "row", justifyContent: "space-between", width: width *0.18}}>
-                      <View style={styles.selectorView}>
-                        <Pressable
-                          style={{ flexDirection: "row", alignItems: "center" }}
-                          onPress={() => setMatchDropdownVisible(true)}
-                        >
-                          <Text style={styles.paramHeaderText}>{selectedMatchOption}</Text>
-                          <MaterialIcons name="arrow-drop-down" size={30} color="#25292e" />
-                        </Pressable>
-                      </View>
-                      <View style={styles.searchBox}>
-                        <TextInput
-                          placeholder="Match Number"
-                          keyboardType="number-pad"
-                          value={String(matchFormData.match_number)}
-                          onChangeText={(val) =>
-                              setMatchFormData((prev) => ({
-                                  ...prev,
-                                  match_number: Number.parseInt(val.replace(/[^0-9]/g, '')) // remove anything that's not a digit
-                              }))
-                          }
-                          style={styles.matchSearchBox}
-                        />
-                        <MaterialIcons name="search" size={30} color="#25292e" />
-                      </View>
-                    </View>
-                  </View>
-                  <View style={styles.teamSearch}>
-                    <Text style={styles.paramHeaderText}>
-                      Team
-                    </Text>
-                    <View style={styles.searchBox}>
-                      <TextInput
-                        placeholder="Team Number"
-                          keyboardType="number-pad"
-                          value={String(matchFormData.team_number)}
-                          onChangeText={(val) =>
-                              setMatchFormData((prev) => ({
-                                  ...prev,
-                                  team_number: Number.parseInt(val.replace(/[^0-9]/g, '')) // remove anything that's not a digit
-                              }))
-                          }
-                          style={styles.matchSearchBox}
-                      />
-                      <MaterialIcons name="search" size={30} color="#25292e" />
-                    </View>
-                  </View>
+                {!(formData.motif_amount_auto === 0 && formData.overflow_amount_auto === 0 && formData.classified_amount_auto === 0) &&<MaterialIcons name="check-box-outline-blank" size={20}/>}
+                {formData.motif_amount_auto === 0 && formData.overflow_amount_auto === 0 && formData.classified_amount_auto === 0 &&<MaterialIcons name="check-box" size={20}/>}
+              </Pressable>
+            </View>
+            <View style={styles.dataScrollView}>
+              <ScrollView 
+              horizontal={true}
+              >
+                <View style={styles.dataView}>
+                  <Text style={{fontSize: 20}}>
+                    Classified
+                  </Text>
+                  <TextInput 
+                    style={styles.dataTextInput}
+                    keyboardType="numeric"
+                    placeholder="Record here"
+                    placeholderTextColor="grey"
+                    value={String(formData.classified_amount_auto || "")}
+                    onChangeText={handleNumberInput("classified_amount_auto")}
+                  />
                 </View>
+                <View style={styles.dataView}>
+                  <Text style={{fontSize: 20}}>
+                    Overflow
+                  </Text>
+                  <TextInput 
+                    style={styles.dataTextInput}
+                    placeholder="Record here"
+                    placeholderTextColor="grey"
+                    keyboardType="numeric"
+                    value={String(formData.overflow_amount_auto || "")}
+                    onChangeText={handleNumberInput("overflow_amount_auto")}
+                  />
+                </View>
+                <View style={styles.dataView}>
+                  <Text style={{fontSize: 20}}>
+                    Motif Count
+                  </Text>
+                  <TextInput 
+                    style={styles.dataTextInput}
+                    placeholder="Record here"
+                    placeholderTextColor="grey"
+                    keyboardType="numeric"
+                    value={String(formData.motif_amount_auto || "")}
+                    onChangeText={handleNumberInput("motif_amount_auto")}
+                  />
+                </View>
+              </ScrollView>
+            </View>
+            
+            <Text style={{fontSize:20}}>
+              {formData.classified_amount_auto * 3 + formData.overflow_amount_auto + formData.motif_amount_auto * 2} Points
+            </Text>
+            
+          </View>
+
+          <View style={styles.teleopRecordView}>
+            <View style={styles.teleopHeaderView}>
+              <Text style={{fontSize:20}}>
+                Teleop Scoring
+              </Text>
+              <Pressable 
+                style={styles.teleopCheckBoxButton}
+                onPress={()=>{setAscentBonus()}}
+              >
+                <Text>
+                  Two Robot Ascent
+                </Text>
+                {!formData.can_park_two_robots &&<MaterialIcons name="check-box-outline-blank" size={20}/>}
+                {formData.can_park_two_robots &&<MaterialIcons name="check-box" size={20}/>}
+              </Pressable>
+            </View>
+            <View style={styles.dataScrollView}>
+              <ScrollView 
+              horizontal={true}
+              >
+                <View style={styles.dataView}>
+                  <Text style={{fontSize: 20}}>
+                    Classified
+                  </Text>
+                  <TextInput 
+                    style={styles.dataTextInput}
+                    placeholder="Record here"
+                    placeholderTextColor="grey"
+                    keyboardType="numeric"
+                    value={String(formData.classified_amount_teleop || "")}
+                    onChangeText={handleNumberInput("classified_amount_teleop")}
+                  />
+                </View>
+                <View style={styles.dataView}>
+                  <Text style={{fontSize: 20}}>
+                    Overflow
+                  </Text>
+                  <TextInput 
+                    style={styles.dataTextInput}
+                    placeholder="Record here"
+                    placeholderTextColor="grey"
+                    keyboardType="numeric"
+                    value={String(formData.overflow_amount_teleop || "")}
+                    onChangeText={handleNumberInput("overflow_amount_teleop")}
+                  />
+                </View>
+                <View style={styles.dataView}>
+                  <Text style={{fontSize: 20}}>
+                    Motif Count
+                  </Text>
+                  <TextInput 
+                    style={styles.dataTextInput}
+                    placeholder="Record here"
+                    placeholderTextColor="grey"
+                    keyboardType="numeric"
+                    value={String(formData.motif_amount_teleop || "")}
+                    onChangeText={handleNumberInput("motif_amount_teleop")}
+                  />
+                </View>
+              </ScrollView>
+            </View>
+            
+            <Text style={{fontSize:20}}>
+              {formData.classified_amount_teleop * 3 + formData.overflow_amount_teleop + formData.motif_amount_teleop * 2 + scoreBonus} Points
+            </Text>
+          </View>
+
+          <View style={styles.totalScoreView}>
+            <Text style={{fontSize:20}}>{}
+              {formData.classified_amount_auto * 3 + formData.overflow_amount_auto + formData.motif_amount_auto * 2 + formData.classified_amount_teleop * 3 + formData.overflow_amount_teleop + formData.motif_amount_teleop * 2 + scoreBonus} Points Total
+            </Text>
+          </View>
+
+          {selectedOption === "Team" ? 
+          (<>
+            <View style={styles.teamPositionsView}>
+              <View style={styles.teamPositionsHeaderView}>
+                <Text style={{fontSize: 20}}>
+                  Team Positions
+                </Text>
               </View>
+              <ScrollView
+              style={styles.teamPositionScrollView}
+              horizontal={true}
+              >
 
-              <View style={styles.formBody}>
-                <View style={styles.simpleDataView}>
-                  <View style={styles.autoRowView}>
-                    <Text style={styles.headerText}>Autonomous Scoring</Text>
-                    <View style={styles.advancedRowEntries}>
-                      <View style={styles.rowEntry}>
-                        <Text style={styles.dataFormHeaderText}>Classified</Text>
-                        <DataFormRecorder 
-                          value={matchFormData.classified_amount_auto}          
-                          onChange={(val) =>
-                            setMatchFormData((prev) => ({ ...prev, classified_amount_auto: val }))
-                          }
-                        />
-                        
-                      </View>
-                      <View style={styles.rowEntry}>
-                        <Text style={styles.dataFormHeaderText}>Overflow</Text>
-                        <DataFormRecorder 
-                          value={matchFormData.overflow_amount_auto}          
-                          onChange={(val) =>
-                            setMatchFormData((prev) => ({ ...prev, overflow_amount_auto: val }))
-                          }
-                        />
-                      </View>
-                      <View style={styles.rowEntry}>
-                        <Text style={styles.dataFormHeaderText}>Motif Count</Text>
-                        <DataFormRecorder 
-                          value={matchFormData.motif_amount_auto}          
-                          onChange={(val) =>
-                            setMatchFormData((prev) => ({ ...prev, motif_amount_auto: val }))
-                          }
-                        />
-                      </View>
-                    </View>
+                <View style={styles.teamPositionView}>
+                  <View style={styles.teamPositionViewHeader}>
+                    <Text style={{fontSize: 18}}>
+                      Starting Position
+                    </Text>
                   </View>
-
-                  {/* TeleOp Section */}
-                  <View style={styles.teleOpRowView}>
-                    <Text style={styles.headerText}>Tele-Op Scoring</Text>
-                    <View style={styles.teleOpRowEntries}>
-                      <View style={styles.rowEntry}>
-                        <Text style={styles.dataFormHeaderText}>Classified</Text>
-                        <DataFormRecorder 
-                          value={matchFormData.classified_amount_teleop}          
-                          onChange={(val) =>
-                            setMatchFormData((prev) => ({ ...prev, classified_amount_teleop: val }))
-                          }
-                        />
-                      </View>
-                      <View style={styles.rowEntry}>
-                        <Text style={styles.dataFormHeaderText}>Overflow</Text>
-                        <DataFormRecorder 
-                          value={matchFormData.overflow_amount_teleop}          
-                          onChange={(val) =>
-                            setMatchFormData((prev) => ({ ...prev, overflow_amount_teleop: val }))
-                          }
-                        />
-                      </View>
-                      <View style={styles.rowEntry}>
-                        <Text style={styles.dataFormHeaderText}>Motif Count</Text>
-                        <DataFormRecorder 
-                          value={matchFormData.motif_amount_teleop}          
-                          onChange={(val) =>
-                            setMatchFormData((prev) => ({ ...prev, motif_amount_teleop: val }))
-                          }
-                        />
-                      </View>
-                    </View>
+                  <Pressable
+                    onPress={() => setActiveModal("startingPosMap")}
+                  >
+                    <Image source={require("@/assets/images/FTCfield.png")} style={styles.teamPositionViewMap}/>
+                  </Pressable>
+                  <View style={styles.teamPositionCaption}>
+                    <Text style={{fontSize: 18}}>
+                      {startPoses[chosenStart]}
+                    </Text>
                   </View>
                 </View>
 
-                {/* Heatmap Section */}
-                <View style={styles.heatMapView}>
-                  <View style={styles.heatMapHeader}>
-                    <Text style={{ fontSize: 24 }}>Heat Map</Text>
-                    {/* <MaterialIcons name="arrow-drop-down" size={30} color="#25292e" /> */}
+                <View style={styles.teamPositionView}>
+                  <View style={styles.teamPositionViewHeader}>
+                    <Text style={{fontSize: 16}}>
+                      Collection Position
+                    </Text>
                   </View>
-                  <View style={styles.heatMapContainer}>
-                    <Pressable>
-                      <Image source={require("@/assets/images/FTCfield.png")} style={styles.image} />
-                    </Pressable>
-                  </View>
-                  <View style={styles.heatMapButtonView}>
-                    <Text style={styles.headerText}>Coming Soon!</Text>
+                  <Pressable
+                    onPress={()=>{setActiveModal("collectionPosMap")}}
+                  >
+                    <Image source={require("@/assets/images/FTCfield.png")} style={styles.teamPositionViewMap}/>
+                  </Pressable>
+                  <View style={styles.teamPositionCaption}>
+                    <Text style={{fontSize: 18}}>
+                      {collectionPoses[chosenCollection]}
+                    </Text>
                   </View>
                 </View>
-              </View>
 
-              <View style={styles.matchInfo}>
-                <Text style={styles.headerText}>Advanced Metrics</Text>
-                <View style={styles.advancedMatchRowEntries}>
-                  <View style={styles.rowEntry}>
-                    <Text style={styles.dataFormHeaderText}>Shots made in auto</Text>
-                    <DataFormRecorder
-                      value={matchFormData.shots_made_auto}
-                      onChange={(val) =>
-                        setMatchFormData((prev) => ({ ...prev, shots_made_auto: val }))
-                      }
-                    />
+                <View style={styles.finalteamPositionView}>
+                  <View style={styles.teamPositionViewHeader}>
+                    <Text style={{fontSize: 18}}>
+                      Scoring Position
+                    </Text>
                   </View>
-                  <View style={styles.rowEntry}>
-                    <Text style={styles.dataFormHeaderText}>Shots attempted in auto</Text>
-                    <DataFormRecorder
-                      value={matchFormData.shots_attempted_auto}
-                      onChange={(val) =>
-                        setMatchFormData((prev) => ({ ...prev, shots_attempted_auto: val }))
-                      }
-                    />
-                  </View>
-                  <View style={styles.rowEntry}>
-                    <Text style={styles.dataFormHeaderText}>Shots made in teleop</Text>
-                    <DataFormRecorder
-                      value={matchFormData.shots_made_teleop}
-                      onChange={(val) =>
-                        setMatchFormData((prev) => ({ ...prev, shots_made_teleop: val }))
-                      }
-                    />
-                  </View>
-                  <View style={styles.rowEntry}>
-                    <Text style={styles.dataFormHeaderText}>Shots attempted in teleop</Text>
-                    <DataFormRecorder
-                      value={matchFormData.shots_attempted_teleop}
-                      onChange={(val) =>
-                        setMatchFormData((prev) => ({ ...prev, shots_attempted_teleop: val }))
-                      }
-                    />
+                  <Pressable
+                    onPress={()=>{setActiveModal("scoringPosMap")}}
+                  >
+                    <Image source={require("@/assets/images/FTCfield.png")} style={styles.teamPositionViewMap}/>
+                  </Pressable>
+                  <View style={styles.teamPositionCaption}>
+                    <Text style={{fontSize: 18}}>
+                      {scoringPoses[chosenScoring]}
+                    </Text>
                   </View>
                 </View>
                 
-              </View>
+              </ScrollView>
+            </View>
+            </>
+          ):(<>
+              
             </>
           )}
+
+          <View style={styles.additionalInfo}>
+            <View style={styles.additionalInfoHeaderView}>
+              <Text style={{fontSize: 20}}>
+                Additional Information
+              </Text>
+            </View>
+            <TextInput
+              multiline
+              textAlignVertical="top"
+              placeholder={`Enter additional notes on team #${formData.team_number}`}
+              placeholderTextColor="grey"
+              style={styles.additionalInfoBodyView}
+              value={String(formData.additional_info || "")}
+              onChangeText={(text) =>
+                    setFormData((prev) => ({ ...prev, additional_info: text }))
+                  }
+            />
+          </View>
           
         </View>
+        
       </ScrollView>
-
-      <Pressable style={styles.createButton} onPress={onSubmit}>
-        <View style={styles.button}>
-          <Text style={styles.headerText}>Create Report</Text>
-        </View>
-      </Pressable>
-
-      <Modal
-        visible={alertVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={handleAlertDismiss}
+      <Pressable
+        style={styles.confirmReport}
       >
-        <View style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "rgba(0,0,0,0.5)",
-        }}>
-          <View style={{
-            width: "80%",
-            backgroundColor: "white",
-            borderRadius: 10,
-            padding: 20,
-            alignItems: "center",
-          }}>
-            <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>{alertTitle}</Text>
-            <Text style={{ fontSize: 16, marginBottom: 20 }}>{alertMessage}</Text>
-            <Pressable
-              style={{
-                backgroundColor: "#007AFF",
-                paddingVertical: 10,
-                paddingHorizontal: 20,
-                borderRadius: 8,
-              }}
-              onPress={handleAlertDismiss}
-            >
-              <Text style={{ color: "white", fontSize: 16 }}>OK</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
-
+        <Text style={{fontSize: 25}}>
+          Create Report
+        </Text>
+      </Pressable>
     </View>
   );
 }
 
 const formBodyHeight = 0.7;
 const advancedInfoHeight = 0.3;
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF9F1" },
-  infoScroll: { flex: 1, paddingBottom: 75 },
+  loaderContainer: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center" },
+  infoScroll: { 
+    flex: 1, 
+    paddingBottom: 75 
+  },
   header: {
     height: height * 0.1,
     flexDirection: "row",
@@ -771,232 +783,297 @@ const styles = StyleSheet.create({
     paddingLeft: width * 0.025,
     paddingRight: width * 0.025,
   },
-  selectorView: { flexDirection: "row", alignItems: "center" },
+  selectorView: { 
+    flexDirection: "row", 
+    alignItems: "center" },
   headerText: { fontSize: 24 },
-  dataFormHeaderText: { fontSize: 18, textAlign: "center" },
-  formBody: {
-    height: height * formBodyHeight,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingLeft: width * 0.025,
-    paddingRight: width * 0.025,
-  },
-  simpleDataView: {
-    height: height * formBodyHeight,
-    width: width * 0.55,
+  startingPosModalView:{
+    backgroundColor: "white",
+    borderRadius: 5,
+    width: width * 0.75,
+    height: height * 0.4,
     flexDirection: "column",
-    justifyContent: "space-between",
-    paddingBottom: height * formBodyHeight * 0.1,
-  },
-  autoRowView: { height: height * 0.4 * formBodyHeight, justifyContent: "space-between" },
-  autoRowEntries: {
-    height: height * 0.4 * 0.5,
-    width: width * 0.55,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  teleOpRowView: { 
-    height: height * 0.4 * formBodyHeight, 
-    justifyContent: "space-between", 
-  },
-  teleOpRowEntries: {
-    height: height * 0.4 * 0.5,
-    width: width * 0.55,
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  rowEntry: {
-    height: height * 0.4 * 0.5,
-    width: width * 0.55 * 0.25,
-    flexDirection: "column",
-    justifyContent: "space-around",
     alignItems: "center",
+    paddingVertical: 10,
   },
-  dataInput: {
-    width: width * 0.55 * 0.25 * 0.5,
-    height: height * 0.4 * 0.5 * 0.6,
-    textAlign: "center",
-    backgroundColor: "#d3d3d3ff",
-    borderRadius: 15,
+  startingPosModalHeader: {
+    height: height * 0.33 * 0.2,
   },
-  heatMapView: {
-    height: height * formBodyHeight,
-    width: width * 0.4,
-    flexDirection: "column",
+  startingPosModalImage:{
+    width: width * 0.75 * 0.6,
+    height: width * 0.75 * 0.6,
   },
-  heatMapHeader: {
-    height: height * 0.15 * formBodyHeight,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "center",
-  },
-  heatMapContainer: { height: height * 0.65 * formBodyHeight, alignItems: "center" },
-  image: {
-    width: height * 0.65 * formBodyHeight,
-    height: height * 0.65 * formBodyHeight,
-    resizeMode: "contain",
-  },
-  heatMapButtonView: {
-    height: height * 0.2 * formBodyHeight,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  advancedInfo: {
-    paddingHorizontal: width * 0.025,
-    paddingBottom: height * 0.05,
-    marginTop: 10,
-    flexDirection: "column",
-    justifyContent: "flex-start",
-  },
-  advancedRowView: { height: height * advancedInfoHeight, justifyContent: "space-between" },
-  advancedRowEntries: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    width: width * 0.555,
-  },
-  advancedRowEntry: {
-    height: height * 0.4 * 0.5,
-    width: width * 0.55 * 0.275,
-    flexDirection: "column",
-    justifyContent: "space-around",
-    alignItems: "center",
-  },
-  advancedMatchRowEntries: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    width: width * 0.95,
-  },
-  additionalInfoView: {
-    height: height * 0.3,
-    paddingLeft: width * 0.025,
-    paddingRight: width * 0.025,
-    paddingTop: height * 0.02,
-    justifyContent: "space-between",
-  },
-  textBox: {
-    backgroundColor: "#afafafff",
-    borderRadius: 10,
-    padding: 5,
-  },
-  createButton: {
+  startingPosConfirmButton:{
     position: "absolute",
     bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  button: {
-    borderTopLeftRadius: 10,
+    width: width * 0.3,
+    height: height * 0.33 * 0.2,
     borderTopRightRadius: 10,
-    backgroundColor: "#ffd28fff",
-    width: width * 0.2,
-    height: 75,
+    borderTopLeftRadius: 10,
+    backgroundColor: '#b5d9ffff',
     flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  teamReportInfoView: {
+    marginLeft: width * 0.025,
+    paddingVertical: height * 0.15 * 0.025,
+    paddingLeft: width * 0.55 * 0.025,
+    width: width * 0.6,
+    height: height * 0.17,
+    backgroundColor:"#ffffffff",
+    borderRadius: 5,
+    flexDirection: "column",
+    justifyContent: "space-between"
+  },
+  matchReportInfoView:{
+    marginLeft: width * 0.025,
+    paddingVertical: height * 0.13 * 0.05,
+    paddingLeft: width * 0.55 * 0.025,
+    width: width * 0.95,
+    height: height * 0.13,
+    backgroundColor:"#ffffffff",
+    borderRadius: 5,
+    flexDirection: "column",
+    justifyContent: "space-between"
+  },
+  matchReportDetailsScrollView:{
+    width: width * 0.95,
+    height: height * 0.15 * 0.45,
+  },
+  privacyView:{
+    width: width * 0.35,
+    height: height * 0.15 * 0.25,
+    borderRadius: 10,
+    backgroundColor: "#3d91ffff",
+    flexDirection: "row",
+  },
+  privacyViewGrayed:{
+    width: width * 0.35,
+    height: height * 0.15 * 0.25,
+    borderRadius: 10,
+    backgroundColor: "#ffffffff",
+    flexDirection: "row",
+  },
+  privacyViewLeft:{
+    fontSize:20,
+    width: width * 0.35 * 0.5,
+    height: height * 0.15 * 0.25,
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  privacyViewRight:{
+    fontSize: 20,
+    backgroundColor: "#ffffffff",
+    width: width * 0.35 * 0.5,
+    height: height * 0.15 * 0.25,
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
-  loaderContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  toggleRow: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-    justifyContent: "space-around",
-    height: height * 0.25, // give space to show switches
-    marginTop: 10,
-  },
-  toggleSection: {
-    marginTop: 10,
-    marginBottom: 20,
-    flexDirection: "column",
-    gap: 10,
-  },
-
-  toggleEntry: {
-    flexDirection: "row",
+  privacyViewRightSelected:{
+    fontSize: 20,
+    backgroundColor: "#3d91ffff",
+    width: width * 0.35 * 0.5,
+    height: height * 0.15 * 0.25,
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
+    justifyContent: "center",
     alignItems: "center",
+  },
+  teamNumberView:{
+    width: width * 0.45,
+    marginRight: width * 0.45 * 0.1,
+    height: height * 0.15 * 0.4,
+    flexDirection: "column",
     justifyContent: "space-between",
-    paddingVertical: 5,
   },
-
-  additionalInfoSection: {
-    marginTop: 15,
-    flexDirection: "column",
+  selfReportButton:{
+    width: width * 0.25,
+    height: height * 0.15 * 0.25,
+    borderRadius: 5,
+    backgroundColor: "#ecececff",
+    alignItems: "center",
+    justifyContent: "center"
   },
-
-  additionalInput: {
-    fontSize: 16,
-    textAlignVertical: "top",
-    padding: 10,
-    backgroundColor: "#f2f2f2",
-    borderRadius: 10,
-    minHeight: height * 0.15,
-  },
-  
-  matchInfo: {
-    paddingHorizontal: width * 0.025,
-    paddingBottom: height * 0.05,
-    marginTop: 10,
-    height: height * 0.3,
-    flexDirection: "column",
-    justifyContent: "flex-start",
-  },
-
-  matchBody: {
+  autoRecordView:{
     height: height * 0.175,
-    paddingLeft: width * 0.025,
-    paddingRight: width * 0.025,
-    
+    width: width * 0.95,
+    borderRadius: 10,
+    marginLeft: width * 0.025,
+    marginTop: height * 0.0125,
+    paddingVertical: height * 0.15 * 0.025,
+    paddingLeft: width * 0.55 * 0.025,
+    flexDirection: "column",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffffff"
   },
-
-  matchSearchParams: {
+  headerView:{
+    height: height * 0.2 * 0.2,
+    width: width * 0.90,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingTop: height * 0.03,
-    paddingRight: width * 0.075
+    alignItems:"baseline"
   },
-
-  paramHeaderText: {
-    fontSize: 18
+  autoCheckBoxButton:{
+    height: height * 0.2 * 0.2,
+    width: width * 0.95 * 0.9 *0.4,
+    flexDirection: "row", 
+    justifyContent: "space-between",
   },
-
-  eventSearch: {
+  dataScrollView:{
+    width: width * 0.925,
+    height: height * 0.2 * 0.4,
+  },
+  dataView:{
+    width: width * 0.95 * 0.3,
+    height: height * 0.2 * 0.35,
+    marginRight: width * 0.95 * 0.05,
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  dataTextInput:{
+    fontSize: 16,
+  },
+  teleopRecordView:{
+    height: height * 0.175,
+    width: width * 0.95,
+    borderRadius: 10,
+    marginLeft: width * 0.025,
+    marginTop: height * 0.025,
+    paddingVertical: height * 0.15 * 0.025,
+    paddingLeft: width * 0.55 * 0.025,
+    flexDirection: "column",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffffff"
+  },
+  teleopHeaderView:{
+    height: height * 0.2 * 0.2,
+    width: width * 0.90,
     flexDirection: "row",
+    justifyContent:"space-between",
+    alignItems:"baseline",
+  },
+  teleopCheckBoxButton:{
+    height: height * 0.2 * 0.2,
+    width: width * 0.95 * 0.9 *0.425,
+    flexDirection: "row", 
+    justifyContent: "space-between",
+  },
+
+  totalScoreView: {
+    height: height * 0.05,
+    width: width * 0.40,
+    marginTop: height * 0.0125,
+    marginLeft: width * 0.025,
+    backgroundColor: "#ffffffff",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+
+  teamPositionsView: {
+    height: height * 0.275,
+    width: width * 0.95,
+    marginLeft: width * 0.025,
+    marginTop: height * 0.04,
+    paddingLeft: width * 0.95 * 0.025,
+    paddingVertical: height * 0.4 * 0.025,
+    backgroundColor: "#ffffffff",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+
+  teamPositionsHeaderView: {
+    height: height * 0.275 * 0.125,
+    width: width * 0.95 * 0.4,
+    flexDirection: "row",
+    alignItems:"baseline",
+  },
+
+  teamPositionScrollView: {
+    height: height * 0.275 * 0.85,
+    width: width * 0.95 * 0.95,
+  },
+
+  teamPositionView: {
+    height: height * 0.275 * 0.75,
+    width: width * 0.95 * 0.95 * 0.4,
+    marginRight: width * 0.95 * 0.95 * 0.1,
+    flexDirection: "column",
     justifyContent: "space-between",
     alignItems: "center",
-    width: width * 0.15,
-        
   },
 
-  matchSearch:{
-    flexDirection: "row",
+  finalteamPositionView: {
+    height: height * 0.275 * 0.75,
+    width: width * 0.95 * 0.95 * 0.4,
+    flexDirection: "column",
     justifyContent: "space-between",
     alignItems: "center",
-    width: width * 0.32,
   },
 
-  matchSearchBox:{
-    width: width * 0.075,
+  teamPositionViewHeader: {
+    height: height * 0.275 * 0.75 * 0.175,
+    width: width * 0.95 * 0.95 * 0.4,
     flexDirection: "row",
-    justifyContent: "flex-start",
+    justifyContent: "center",
   },
 
-  thinMatchSearchBox:{
-    
-  },
-
-  teamSearch:{
+  teamPositionViewMap: {
+    width: width * 0.95 * 0.95 * 0.35,
+    height: width * 0.95 * 0.95 * 0.35,
     flexDirection: "row",
+    justifyContent: "center",
+  },
+
+  teamPositionCaption: {
+    height: height * 0.275 * 0.75 * 0.15,
+    width: width * 0.95 * 0.95 * 0.4,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+
+  additionalInfo: {
+    height: height * 0.175,
+    width: width * 0.95,
+    marginLeft: width * 0.025,
+    marginTop: height * 0.04,
+    paddingVertical: height * 0.15 * 0.025,
+    paddingLeft: width * 0.55 * 0.025,
+    backgroundColor: "#ffffffff",
+    flexDirection: "column",
     justifyContent: "space-between",
-    alignItems: "center",
-    width: width * 0.15,
   },
 
-  searchBox: {
-    width: width * 0.1,
-    flexDirection: "row",
-    borderBottomWidth: 2,
+  additionalInfoHeaderView:{
+    width: width * 0.95 * 0.75,
+    height: height * 0.175 * 0.2,
   },
+
+  additionalInfoBodyView:{
+    width: width * 0.95 ,
+    height: height * 0.175 * 0.7,
+    textAlign: "left",
+  },
+
+  confirmReport:{
+    width: width * 0.5,
+    height: height * 0.05,
+    borderTopRightRadius: 5,
+    borderTopLeftRadius: 5,
+    alignSelf: "center",
+    position: "absolute",
+    bottom: 0,
+    backgroundColor: "#cdf1ffff",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+
+  container: { flex: 1, backgroundColor: "#F2F2F2" },
 
 });
+
