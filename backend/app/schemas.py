@@ -103,6 +103,13 @@ class MatchReportBase(ConfigBase):
     shots_made_teleop: int
     shots_attempted_teleop: int
 
+    far_zone_collection_freq: int
+    classifier_collection_freq: int
+    human_player_collection_freq: int
+
+    close_zone_scoring_freq: int
+    far_zone_scoring_freq: int
+
     additional_info: Optional[str] = "No additional info about the team"
 
 
@@ -110,8 +117,20 @@ class MatchReportCreate(MatchReportBase):
     pass
 
 class MatchReportDisplay(MatchReportBase):
+    id: int = Field(alias="_id")
     user: UserSafeDiplay
     model_config = ConfigDict(from_attributes=True)
+
+class CycleInfoBase(ConfigBase):
+    collection_position: str
+    scoring_position: str
+    artifacts_collected: int
+    artifacts_scored: int
+    cycle_time: float
+
+class CycleInfoCreate(CycleInfoBase):
+    pass
+    
 
 class EventBase(ConfigBase):
     code: str

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, Numeric, String, TIMESTAMP, text, ForeignKey, Date
+from sqlalchemy import Boolean, Column, Integer, Float, String, TIMESTAMP, text, ForeignKey, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import declarative_base
 
@@ -92,16 +92,36 @@ class MatchReport(Base):
     shots_attempted_auto = Column(Integer, nullable=False, server_default=text("0"))
     shots_made_teleop = Column(Integer, nullable=False, server_default=text("0"))
     shots_attempted_teleop = Column(Integer, nullable=False, server_default=text("0"))
-    
+
+    far_zone_collection_freq = Column(Integer, nullable=False, server_default=text("0"))
+    classifier_collection_freq = Column(Integer, nullable=False, server_default=text("0"))
+    human_player_collection_freq = Column(Integer, nullable=False, server_default=text("0"))
+
+    close_zone_scoring_freq = Column(Integer, nullable=False, server_default=text("0"))
+    far_zone_scoring_freq = Column(Integer, nullable=False, server_default=text("0"))
 
 
     additional_info = Column(String, nullable=True)
 
     user = relationship("User", back_populates="match_reports")
     team = relationship("Team", back_populates="match_reports")
+    match_reports_cycle_info = relationship("CycleInfo", back_populates="match_report")
 
 
+class CycleInfo(Base):
+    __tablename__ = "match_reports_cycle_info"
+
+    _id = Column(Integer, primary_key=True)
+    match_report_id = Column(Integer, ForeignKey("match_reports._id"), nullable=False)
     
+    cycle_time = Column(Float, nullable=True, server_default=text("0"))
+    collection_position = Column(String, nullable=False)
+    scoring_position = Column(String, nullable=False)
+    artifacts_collected = Column(Integer, nullable=False, server_default=text("0"))
+    artifacts_scored = Column(Integer, nullable=False, server_default=text("0"))
+
+    match_report = relationship("MatchReport", back_populates="match_reports_cycle_info")
+
     
 
 

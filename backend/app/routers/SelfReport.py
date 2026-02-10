@@ -22,10 +22,11 @@ def create_Self_Report(self_report_data: schemas.SelfReportCreate,db:Session = D
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
     
     db.query(models.SelfReport).filter(models.SelfReport.team_number == current_user.team_number).update({models.SelfReport.is_newest: False})
+    print(self_report_data.team_number)
     newest_self_report = models.SelfReport(user_id = current_user._id,  
                                            creator_team_number = current_user.team_number,
-                                           team_number = self_report_data.team_number,
                                            **self_report_data.model_dump())
+    
     db.add(newest_self_report)
     db.commit()
     db.refresh(newest_self_report)

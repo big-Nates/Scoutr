@@ -126,7 +126,7 @@ def get_match_report_by_id(match_report_id: int, db: Session = Depends(get_db), 
 
 @router.patch("/{match_report_id}", response_model=schemas.MatchReportDisplay)
 def update_match_report(updated_match_report: schemas.MatchReportCreate,match_report_id: int, db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(get_current_user)):
-    match_report = db.query(models.MatchReport).filter(models.MatchReport._id == match_report_id).first()
+    match_report = db.query(models.MatchReport).filter(models.MatchReport._id == match_report_id, models.MatchReport.team_number == current_user.team_number).first()
     if not match_report:
         raise HTTPException(status_code=404, detail= f"Match report with id {match_report_id} not found")
     new_data = updated_match_report.model_dump(exclude_unset=True)
@@ -136,5 +136,17 @@ def update_match_report(updated_match_report: schemas.MatchReportCreate,match_re
     db.refresh(match_report)
     return match_report
 
+@router.post("/{match_report_id}/cycles/", response_model=List[schemas.CycleInfoBase])
+def create_cycle(cycle_info: List[schemas.CycleInfoCreate], match_report_id: int, db: Session = Depends(get_db), current_user: schemas.UserDisplay = Depends(get_current_user)):
+    match_report = db.query(models.MatchReport).filter(models.MatchReport._id == match_report_id, models.MatchReport.creator_team_number == current_user.team_number).first()
+    
+    if not match_report:
+        raise HTTPException(status_code=404, detail= f"Match report with id {match_report_id} not found")
+    for cycle in cycle_info:
+        created_cycle = models.CycleInfo(match_report_id = match_report_id, **cycle.model_dump())
+        db.add(created_cycle)
+        db.commit()
+        db.refresh(created_cycle)
+    return cycle_info
     
     
